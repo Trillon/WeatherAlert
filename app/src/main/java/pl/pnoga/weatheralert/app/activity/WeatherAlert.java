@@ -1,10 +1,6 @@
-package pl.pnoga.weatheralert.app;
+package pl.pnoga.weatheralert.app.activity;
 
 import android.app.Activity;
-import android.content.Context;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -13,35 +9,33 @@ import com.octo.android.robospice.JacksonSpringAndroidSpiceService;
 import com.octo.android.robospice.SpiceManager;
 import com.octo.android.robospice.persistence.exception.SpiceException;
 import com.octo.android.robospice.request.listener.RequestListener;
+import pl.pnoga.weatheralert.app.R;
+import pl.pnoga.weatheralert.app.dao.MeasurementDAO;
+import pl.pnoga.weatheralert.app.dao.StationDAO;
 import pl.pnoga.weatheralert.app.model.StationList;
+import pl.pnoga.weatheralert.app.model.WeatherMeasurementList;
+import pl.pnoga.weatheralert.app.request.MeasurementRequest;
+import pl.pnoga.weatheralert.app.request.StationRequest;
 
 
 public class WeatherAlert extends Activity {
     private final String TAG = "WeatherAlert";
     private SpiceManager spiceManager = new SpiceManager(
             JacksonSpringAndroidSpiceService.class);
-    private LocationManager mLocationManager;
-    private final long LOCATION_REFRESH_TIME = 1000 *60;
-    private final long LOCATION_REFRESH_DISTANCE = 1000;
+    private StationDAO stationDAO;
+    private MeasurementDAO measurementDAO;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather_alert);
-        performRequest();
-        LocationManager locManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-        boolean network_enabled = locManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        Location location;
-        double longitude = 0, latitude=0;
-        if(network_enabled){
-            location = locManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        performRequestForStations();
+        stationDAO = new StationDAO(this);
+        measurementDAO = new MeasurementDAO(this);
+        stationDAO.open();
+        measurementDAO.open();
+        Log.d(TAG, "Measurments " + measurementDAO.getMeasurementsCount());
 
-            if(location!=null){
-                longitude = location.getLongitude();
-                latitude = location.getLatitude();
-            }
-        }
-        Log.d(TAG, String.valueOf(longitude));
-        Log.d(TAG, String.valueOf(latitude));
     }
 
     @Override
@@ -54,6 +48,20 @@ public class WeatherAlert extends Activity {
     protected void onStop() {
         spiceManager.shouldStop();
         super.onStop();
+    }
+
+    @Override
+    protected void onResume() {
+        stationDAO.open();
+        measurementDAO.open();
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        stationDAO.close();
+        measurementDAO.close();
+        super.onPause();
     }
 
     @Override
@@ -77,42 +85,47 @@ public class WeatherAlert extends Activity {
 
         return super.onOptionsItemSelected(item);
     }
-    private void performRequest() {
+
+    private void performRequestForStations() {
 
         StationRequest request = new StationRequest();
         spiceManager.execute(request, new StationListRequestListener());
     }
-    private class StationListRequestListener implements RequestListener<StationList>{
+
+    private void performRequestForMeasurments() {
+        for (String stationName : stationDAO.getStationsId()) {
+            MeasurementRequest request = new MeasurementRequest(stationName);
+            spiceManager.execute(request, new MeasurementRequestListener());
+        }
+    }
+
+    private class StationListRequestListener implements RequestListener<StationList> {
         @Override
         public void onRequestFailure(SpiceException spiceException) {
-            Log.d(TAG, "Failure");
+            Log.d(TAG, "Failure station request");
         }
 
         @Override
         public void onRequestSuccess(StationList stations) {
-            Log.d(TAG, String.valueOf(stations.size()));
+            Log.d(TAG, "Downloaded " + stations.size() + " stations");
+            stationDAO.saveStations(stations);
+            performRequestForMeasurments();
         }
     }
-    private final LocationListener mLocationListener = new LocationListener() {
+
+    private class MeasurementRequestListener implements RequestListener<WeatherMeasurementList> {
         @Override
-        public void onLocationChanged(final Location location) {
-            Log.d(TAG, String.valueOf(location.getLatitude()));
-            Log.d(TAG, String.valueOf(location.getLongitude()));
+        public void onRequestFailure(SpiceException spiceException) {
+            Log.d(TAG, "Failure measurement request");
         }
 
         @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
+        public void onRequestSuccess(WeatherMeasurementList weatherMeasurements) {
+            Log.d(TAG, "Downloaded " + weatherMeasurements.size() + " measurement");
+            measurementDAO.saveMeasurements(weatherMeasurements);
 
         }
+    }
 
-        @Override
-        public void onProviderEnabled(String provider) {
 
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-
-        }
-    };
 }

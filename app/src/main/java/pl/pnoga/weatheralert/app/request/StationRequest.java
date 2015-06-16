@@ -1,4 +1,4 @@
-package pl.pnoga.weatheralert.app;
+package pl.pnoga.weatheralert.app.request;
 
 
 import com.octo.android.robospice.request.springandroid.SpringAndroidSpiceRequest;
@@ -12,7 +12,7 @@ public class StationRequest extends SpringAndroidSpiceRequest<StationList> {
 
     @Override
     public StationList loadDataFromNetwork() throws Exception {
-        String url = String.format("http://mech.fis.agh.edu.pl/meteo/rest/json/info/");
+        String url = "http://mech.fis.agh.edu.pl/meteo/rest/json/info/";
 
         return getRestTemplate().getForObject(url, StationList.class);
     }
