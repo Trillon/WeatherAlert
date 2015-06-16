@@ -2,7 +2,6 @@ package pl.pnoga.weatheralert.app.dao;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.DatabaseUtils;
 import android.util.Log;
 import pl.pnoga.weatheralert.app.model.WeatherMeasurement;
 
@@ -18,7 +17,6 @@ public class MeasurementDAO extends TableDAO {
 
     public void saveMeasurements(List<WeatherMeasurement> weatherMeasurements) {
         int counter = 0;
-        //SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         for (WeatherMeasurement weatherMeasurement : weatherMeasurements) {
             ContentValues values = new ContentValues();
             values.put("station", weatherMeasurement.getStation());
@@ -39,7 +37,4 @@ public class MeasurementDAO extends TableDAO {
         Log.d(TAG, "Saved " + counter + " measurements");
     }
 
-    public long getMeasurementsCount() {
-        return DatabaseUtils.longForQuery(database, "SELECT COUNT(*) FROM " + TABLE_NAME, null);
-    }
 }
