@@ -5,61 +5,38 @@ import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import com.octo.android.robospice.JacksonSpringAndroidSpiceService;
-import com.octo.android.robospice.SpiceManager;
-import com.octo.android.robospice.persistence.exception.SpiceException;
-import com.octo.android.robospice.request.listener.RequestListener;
 import pl.pnoga.weatheralert.app.R;
 import pl.pnoga.weatheralert.app.dao.MeasurementDAO;
 import pl.pnoga.weatheralert.app.dao.StationDAO;
-import pl.pnoga.weatheralert.app.model.StationList;
-import pl.pnoga.weatheralert.app.model.WeatherMeasurementList;
-import pl.pnoga.weatheralert.app.request.MeasurementRequest;
-import pl.pnoga.weatheralert.app.request.StationRequest;
+import pl.pnoga.weatheralert.app.service.LocationService;
+
+import static android.content.ContentResolver.setIsSyncable;
 
 
 public class WeatherAlert extends Activity {
-    public static final String AUTHORITY = "com.example.android.datasync.provider";
-    // An account type, in the form of a domain name
-    public static final String ACCOUNT_TYPE = "example.com";
-    // The account name
-    public static final String ACCOUNT = "dummyaccount";
+    public static final String AUTHORITY = "pl.pnoga.weatheralert.provider";
+    public static final String ACCOUNT_TYPE = "pnoga.pl";
+    public static final String ACCOUNT = "WeatherAlert";
     private final String TAG = "WeatherAlert";
-    // Instance fields
     Account mAccount;
-    private SpiceManager spiceManager = new SpiceManager(
-            JacksonSpringAndroidSpiceService.class);
+
     private StationDAO stationDAO;
     private MeasurementDAO measurementDAO;
 
     public static Account CreateSyncAccount(Context context) {
-        // Create the account type and default account
         Account newAccount = new Account(
                 ACCOUNT, ACCOUNT_TYPE);
-        // Get an instance of the Android account manager
         AccountManager accountManager =
                 (AccountManager) context.getSystemService(
                         ACCOUNT_SERVICE);
-        /*
-         * Add the account and account type, no password or user data
-         * If successful, return the Account object, otherwise report an error.
-         */
+
         if (accountManager.addAccountExplicitly(newAccount, null, null)) {
-            /*
-             * If you don't set android:syncable="true" in
-             * in your <provider> element in the manifest,
-             * then call context.setIsSyncable(account, AUTHORITY, 1)
-             * here.
-             */
-        } else {
-            /*
-             * The account exists or some other error occurred. Log this, report it,
-             * or handle it internally.
-             */
+            setIsSyncable(newAccount, AUTHORITY, 1);
         }
         return newAccount;
     }
@@ -70,22 +47,32 @@ public class WeatherAlert extends Activity {
         setContentView(R.layout.activity_weather_alert);
         mAccount = CreateSyncAccount(this);
         ContentResolver.setSyncAutomatically(mAccount, AUTHORITY, true);
-        performRequestForStations();
+        ContentResolver.setIsSyncable(mAccount, AUTHORITY, 1);
+        Bundle settingsBundle = new Bundle();
+        settingsBundle.putBoolean(
+                ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        settingsBundle.putBoolean(
+                ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        ContentResolver.requestSync(mAccount, AUTHORITY, settingsBundle);
+        //performRequestForStations();
         stationDAO = new StationDAO(this);
         measurementDAO = new MeasurementDAO(this);
         stationDAO.open();
         measurementDAO.open();
+        LocationService locationService = new LocationService(this);
+        Location location = locationService.getLocation();
+        Log.d(TAG, "Lon " + location.getLongitude());
+        Log.d(TAG, "Lat " + location.getLatitude());
+
     }
 
     @Override
     protected void onStart() {
-        spiceManager.start(this);
         super.onStart();
     }
 
     @Override
     protected void onStop() {
-        spiceManager.shouldStop();
         super.onStop();
     }
 
@@ -125,45 +112,5 @@ public class WeatherAlert extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void performRequestForStations() {
-
-        StationRequest request = new StationRequest();
-        spiceManager.execute(request, new StationListRequestListener());
-    }
-
-    private void performRequestForMeasurments() {
-        for (String stationName : stationDAO.getStationsId()) {
-            MeasurementRequest request = new MeasurementRequest(stationName);
-            spiceManager.execute(request, new MeasurementRequestListener());
-        }
-    }
-
-    private class StationListRequestListener implements RequestListener<StationList> {
-        @Override
-        public void onRequestFailure(SpiceException spiceException) {
-            Log.d(TAG, "Failure station request");
-        }
-
-        @Override
-        public void onRequestSuccess(StationList stations) {
-            Log.d(TAG, "Downloaded " + stations.size() + " stations");
-            stationDAO.saveStations(stations);
-            performRequestForMeasurments();
-        }
-    }
-
-    private class MeasurementRequestListener implements RequestListener<WeatherMeasurementList> {
-        @Override
-        public void onRequestFailure(SpiceException spiceException) {
-            Log.d(TAG, "Failure measurement request");
-        }
-
-        @Override
-        public void onRequestSuccess(WeatherMeasurementList weatherMeasurements) {
-            Log.d(TAG, "Downloaded " + weatherMeasurements.size() + " measurement");
-            measurementDAO.saveMeasurements(weatherMeasurements);
-
-        }
-    }
 
 }

@@ -34,8 +34,13 @@ public class LocationService extends Service implements LocationListener {
                 location = locationManager.getLastKnownLocation(provider);
                 return location;
             }
+        } else {
+            Log.d(TAG, "No provider, fixed location");
+            location = new Location("");
+            location.setLatitude(50.0614);
+            location.setLongitude(19.9383);
+            return location;
         }
-        Log.d(TAG, "No provider");
         return null;
     }
 

@@ -10,6 +10,9 @@ apply plugin: 'com.android.application'
 
 repositories {
     jcenter()
+    maven {
+        url 'http://repo.spring.io/milestone'
+    }
 }
 
 android {
@@ -47,7 +50,8 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.octo.android.robospice:robospice-spring-android:1.4.14'
-    compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.13'
-
+    //compile 'com.octo.android.robospice:robospice-spring-android:1.4.14'
+    //compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.13'
+    compile 'org.springframework.android:spring-android-rest-template:2.0.0.M1'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.3.2'
 }

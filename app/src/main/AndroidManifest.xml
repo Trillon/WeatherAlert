@@ -38,7 +38,7 @@
         </service>
         <provider
                 android:name=".synchronization.StubProvider"
-                android:authorities="com.example.android.datasync.provider"
+                android:authorities="pl.pnoga.weatheralert.provider"
                 android:exported="false"
                 android:syncable="true"/>
         <service
