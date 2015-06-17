@@ -7,13 +7,14 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.widget.ListView;
+import android.widget.TextView;
 import pl.pnoga.weatheralert.app.R;
+import pl.pnoga.weatheralert.app.adapter.ThreatsAdapter;
 import pl.pnoga.weatheralert.app.dao.MeasurementDAO;
 import pl.pnoga.weatheralert.app.dao.StationDAO;
 import pl.pnoga.weatheralert.app.service.LocationService;
+import pl.pnoga.weatheralert.app.utils.ThreatFinder;
 
 import static android.content.ContentResolver.setIsSyncable;
 
@@ -24,11 +25,11 @@ public class WeatherAlert extends Activity {
     public static final String ACCOUNT = "WeatherAlert";
     private final String TAG = "WeatherAlert";
     Account mAccount;
-
+    TextView userCoordinates, stationCount;
     private StationDAO stationDAO;
     private MeasurementDAO measurementDAO;
 
-    public static Account CreateSyncAccount(Context context) {
+    private static Account CreateSyncAccount(Context context) {
         Account newAccount = new Account(
                 ACCOUNT, ACCOUNT_TYPE);
         AccountManager accountManager =
@@ -39,6 +40,10 @@ public class WeatherAlert extends Activity {
             setIsSyncable(newAccount, AUTHORITY, 1);
         }
         return newAccount;
+    }
+
+    private static String locationStringFromLocation(final Location location) {
+        return Location.convert(location.getLatitude(), Location.FORMAT_DEGREES) + " " + Location.convert(location.getLongitude(), Location.FORMAT_DEGREES);
     }
 
     @Override
@@ -54,15 +59,20 @@ public class WeatherAlert extends Activity {
         settingsBundle.putBoolean(
                 ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         ContentResolver.requestSync(mAccount, AUTHORITY, settingsBundle);
-        //performRequestForStations();
         stationDAO = new StationDAO(this);
         measurementDAO = new MeasurementDAO(this);
         stationDAO.open();
         measurementDAO.open();
         LocationService locationService = new LocationService(this);
         Location location = locationService.getLocation();
-        Log.d(TAG, "Lon " + location.getLongitude());
-        Log.d(TAG, "Lat " + location.getLatitude());
+        userCoordinates = (TextView) findViewById(R.id.txt_user_coordinates);
+        stationCount = (TextView) findViewById(R.id.txt_station_count);
+        userCoordinates.setText("Obecna lokacja:\n" + locationStringFromLocation(location));
+        stationCount.setText("Ilość stacji w zasiegu: " + stationDAO.getStations().size());
+        ListView threats = (ListView) findViewById(R.id.lv_threats);
+        ThreatsAdapter threatsAdapter = new ThreatsAdapter(this, ThreatFinder.getThreats());
+        threats.setAdapter(threatsAdapter);
+
 
     }
 
@@ -89,28 +99,4 @@ public class WeatherAlert extends Activity {
         measurementDAO.close();
         super.onPause();
     }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_weather_alert, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-
 }
