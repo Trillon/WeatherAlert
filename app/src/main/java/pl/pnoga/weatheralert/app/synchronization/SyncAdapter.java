@@ -5,6 +5,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.*;
 import android.location.Location;
+import android.media.RingtoneManager;
 import android.os.Bundle;
 import android.util.Log;
 import pl.pnoga.weatheralert.app.R;
@@ -80,20 +81,28 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 
     private void notifyUser() {
+        long[] pattern = {500, 500, 500, 500, 500, 500, 500, 500, 500};
         NotificationManager notificationManager =
                 (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
         Notification red = new Notification.Builder(getContext())
                 .setContentTitle("Wykryto zagrożenie!!")
                 .setContentText("Burza")
                 .setSmallIcon(R.mipmap.red)
-                .setAutoCancel(true).build();
+                .setAutoCancel(true)
+                .setVibrate(pattern)
+                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                .build();
         Notification yellow = new Notification.Builder(getContext())
                 .setContentTitle("Możliwe zagrożenie!!")
                 .setContentText("Wiatr")
                 .setSmallIcon(R.mipmap.yellow)
+                .setVibrate(pattern)
+                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                 .setAutoCancel(true).build();
         Notification green = new Notification.Builder(getContext())
                 .setContentTitle("Brak zagrożeń!!")
+                .setVibrate(pattern)
+                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                 .setSmallIcon(R.mipmap.green)
                 .setAutoCancel(true).build();
 
