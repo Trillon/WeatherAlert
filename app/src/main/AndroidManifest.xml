@@ -23,9 +23,6 @@
             </intent-filter>
         </activity>
         <service
-                android:name="com.octo.android.robospice.JacksonSpringAndroidSpiceService"
-                android:exported="false" />
-        <service
                 android:name=".service.LocationService"/>
         <service
                 android:name=".synchronization.AuthenticatorService">

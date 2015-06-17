@@ -1,5 +1,6 @@
 package pl.pnoga.weatheralert.app.synchronization;
 
+import android.util.Log;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 import pl.pnoga.weatheralert.app.model.StationList;
@@ -10,18 +11,18 @@ public class ServerDataProvider {
 
 
     public StationList getStations() {
-        StationList stations = new StationList();
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-        stations = restTemplate.getForObject("http://mech.fis.agh.edu.pl/meteo/rest/json/info/", StationList.class);
+        StationList stations = restTemplate.getForObject("http://mech.fis.agh.edu.pl/meteo/rest/json/info/", StationList.class);
+        Log.d(TAG, "Station downloaded: " + stations.size());
         return stations;
     }
 
-    public WeatherMeasurementList getWeatherMeasurements() {
-        WeatherMeasurementList weatherMeasurements = new WeatherMeasurementList();
+    public WeatherMeasurementList getWeatherMeasurements(String stationName) {
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-        weatherMeasurements = restTemplate.getForObject("http://mech.fis.agh.edu.pl/meteo/rest/json/last/s000", WeatherMeasurementList.class);
+        WeatherMeasurementList weatherMeasurements = restTemplate.getForObject("http://mech.fis.agh.edu.pl/meteo/rest/json/last/" + stationName, WeatherMeasurementList.class);
+        Log.d(TAG, "Measurments downloaded: " + weatherMeasurements.size() + " for station " + stationName);
         return weatherMeasurements;
     }
 

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
 import pl.pnoga.weatheralert.app.model.Station;
+import pl.pnoga.weatheralert.app.model.StationList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,5 +46,24 @@ public class StationDAO extends TableDAO {
         }
         cursor.close();
         return names;
+    }
+
+    public StationList getStations() {
+        StationList stations = new StationList();
+        Cursor cursor = database.query(TABLE_NAME,
+                new String[]{"name", "station", "lati", "long", "alti"}, null, null, null, null, null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            Station station = new Station();
+            station.setName(cursor.getString(0));
+            station.setStation(cursor.getString(1));
+            station.setLati(cursor.getDouble(2));
+            station.setLongi(cursor.getDouble(3));
+            station.setAlti(cursor.getDouble(4));
+            stations.add(station);
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return stations;
     }
 }

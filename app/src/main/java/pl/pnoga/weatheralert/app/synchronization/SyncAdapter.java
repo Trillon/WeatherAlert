@@ -1,11 +1,22 @@
 package pl.pnoga.weatheralert.app.synchronization;
 
 import android.accounts.Account;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.*;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import pl.pnoga.weatheralert.app.R;
+import pl.pnoga.weatheralert.app.dao.MeasurementDAO;
+import pl.pnoga.weatheralert.app.dao.StationDAO;
+import pl.pnoga.weatheralert.app.model.Station;
+import pl.pnoga.weatheralert.app.model.StationList;
 import pl.pnoga.weatheralert.app.service.LocationService;
+import pl.pnoga.weatheralert.app.utils.Haversine;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private final String TAG = "SyncAdapter";
@@ -33,29 +44,63 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             SyncResult syncResult) {
 
         Log.d(TAG, "performSync");
-        ServerDataProvider serverDataProvider = new ServerDataProvider();
-        Log.d(TAG, "Station size " + serverDataProvider.getStations().size());
-        Log.d(TAG, "Measurment size " + serverDataProvider.getWeatherMeasurements().size());
-        updateStations();
         Location location = updateLocation();
-        Log.d(TAG, "Lon " + location.getLongitude());
-        Log.d(TAG, "Lat " + location.getLatitude());
+        ServerDataProvider serverDataProvider = new ServerDataProvider();
+        StationDAO stationDAO = new StationDAO(getContext());
+        MeasurementDAO measurementDAO = new MeasurementDAO(getContext());
+        measurementDAO.open();
+        stationDAO.open();
+        stationDAO.saveStations(serverDataProvider.getStations());
+        List<String> stationsInRadius = getStationsInRadius(stationDAO.getStations(), location);
+        Log.d(TAG, "Stations in radius " + stationsInRadius.size());
+        for (String stationName : stationsInRadius) {
+            measurementDAO.saveMeasurements(serverDataProvider.getWeatherMeasurements(stationName));
+        }
+
+        notifyUser();
+        stationDAO.close();
+        measurementDAO.close();
     }
 
-    private void updateStations() {
-
+    private List<String> getStationsInRadius(StationList stations, Location location) {
+        List<String> stationNames = new ArrayList<>();
+        double myLatitude = location.getLatitude(), myLongitude = location.getLongitude();
+        for (Station station : stations) {
+            if (Haversine.haversine(myLatitude, myLongitude, station.getLati(), station.getLongi()) < 10)
+                stationNames.add(station.getStation());
+        }
+        return stationNames;
     }
+
 
     private Location updateLocation() {
         LocationService locationService = new LocationService(getContext());
         return locationService.getLocation();
     }
 
-    private void getDataForLocation(Location location) {
-
-    }
 
     private void notifyUser() {
+        NotificationManager notificationManager =
+                (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        Notification red = new Notification.Builder(getContext())
+                .setContentTitle("Wykryto zagrożenie!!")
+                .setContentText("Burza")
+                .setSmallIcon(R.mipmap.red)
+                .setAutoCancel(true).build();
+        Notification yellow = new Notification.Builder(getContext())
+                .setContentTitle("Możliwe zagrożenie!!")
+                .setContentText("Wiatr")
+                .setSmallIcon(R.mipmap.yellow)
+                .setAutoCancel(true).build();
+        Notification green = new Notification.Builder(getContext())
+                .setContentTitle("Brak zagrożeń!!")
+                .setSmallIcon(R.mipmap.green)
+                .setAutoCancel(true).build();
+
+        notificationManager.notify(0, red);
+        notificationManager.notify(1, yellow);
+        notificationManager.notify(2, green);
+
 
     }
 
