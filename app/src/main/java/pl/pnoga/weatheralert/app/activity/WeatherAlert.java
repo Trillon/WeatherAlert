@@ -3,8 +3,8 @@ package pl.pnoga.weatheralert.app.activity;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
-import android.content.ContentResolver;
-import android.content.Context;
+import android.app.ProgressDialog;
+import android.content.*;
 import android.location.Location;
 import android.os.Bundle;
 import android.text.SpannableString;
@@ -28,6 +28,8 @@ public class WeatherAlert extends Activity {
     public static final String AUTHORITY = "pl.pnoga.weatheralert.provider";
     public static final String ACCOUNT_TYPE = "pnoga.pl";
     public static final String ACCOUNT = "WeatherAlert";
+    public static final String ACTION_FINISHED_SYNC = "pl.pnoga.weatheralert.app.activity.ACTION_FINISHED_SYNC";
+    private static IntentFilter syncIntentFilter = new IntentFilter(ACTION_FINISHED_SYNC);
     private final String TAG = "WeatherAlert";
     Account mAccount;
     TextView userCoordinates, stationCount;
@@ -35,6 +37,14 @@ public class WeatherAlert extends Activity {
     private StationDAO stationDAO;
     private MeasurementDAO measurementDAO;
     private ThreatDAO threatDAO;
+    private ProgressDialog Dialog;
+    private BroadcastReceiver syncBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateView();
+            Dialog.dismiss();
+        }
+    };
 
     private static Account CreateSyncAccount(Context context) {
         Account newAccount = new Account(
@@ -78,6 +88,7 @@ public class WeatherAlert extends Activity {
         ListView threats = (ListView) findViewById(R.id.lv_threats);
         threatsAdapter = new ThreatsAdapter(this, threatDAO.getAllThreats());
         threats.setAdapter(threatsAdapter);
+        Dialog = new ProgressDialog(this);
     }
 
     @Override
@@ -96,10 +107,12 @@ public class WeatherAlert extends Activity {
         measurementDAO.open();
         threatDAO.open();
         super.onResume();
+        registerReceiver(syncBroadcastReceiver, syncIntentFilter);
     }
 
     @Override
     protected void onPause() {
+        unregisterReceiver(syncBroadcastReceiver);
         stationDAO.close();
         measurementDAO.close();
         threatDAO.close();
@@ -117,14 +130,12 @@ public class WeatherAlert extends Activity {
         int id = item.getItemId();
 
         if (id == R.id.refresh_settings) {
-            threatsAdapter.clear();
-            threatsAdapter.addAll(threatDAO.getAllThreats());
-            threatsAdapter.sort(new ThreatComparator());
-            threatsAdapter.notifyDataSetChanged();
-            stationCount.setText("Ilość stacji w zasiegu: " + stationDAO.getStations().size());
+            updateView();
             return true;
         }
         if (id == R.id.sync_settings) {
+            Dialog.setMessage("Trwa synchronizacja...");
+            Dialog.show();
             Bundle settingsBundle = new Bundle();
             settingsBundle.putBoolean(
                     ContentResolver.SYNC_EXTRAS_MANUAL, true);
@@ -134,5 +145,14 @@ public class WeatherAlert extends Activity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+
+    private void updateView() {
+        threatsAdapter.clear();
+        threatsAdapter.addAll(threatDAO.getAllThreats());
+        threatsAdapter.sort(new ThreatComparator());
+        threatsAdapter.notifyDataSetChanged();
+        stationCount.setText("Ilość stacji w zasiegu: " + stationDAO.getStations().size());
     }
 }

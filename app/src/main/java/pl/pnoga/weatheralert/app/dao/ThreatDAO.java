@@ -50,4 +50,8 @@ public class ThreatDAO extends TableDAO {
         stationDAO.close();
         return threats;
     }
+
+    public void deleteAll() {
+        database.delete(TABLE_NAME, null, null);
+    }
 }

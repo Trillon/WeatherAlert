@@ -60,7 +60,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         stationDAO.saveStations(serverDataProvider.getStations());
         List<String> stationsInRadius = getStationsInRadius(stationDAO.getStations(), location);
         Log.d(TAG, "Stations in radius " + stationsInRadius.size());
-        for (String stationName : stationsInRadius) {
+        for (String stationName : stationDAO.getStationsId()) {
             measurementDAO.saveMeasurements(serverDataProvider.getWeatherMeasurements(stationName));
         }
         createThreatDataAndSaveToDB();
@@ -116,6 +116,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Log.d(TAG, "Distinct count " + distinctStations.size());
         threatDAO = new ThreatDAO(getContext());
         threatDAO.open();
+        threatDAO.deleteAll();
         threatDAO.saveThreats(threats);
         threatDAO.close();
         notifyUser(threats.size());
@@ -143,6 +144,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         notificationManager.notify(0, red);
         notificationManager.notify(1, yellow);
+        getContext().sendBroadcast(new Intent(WeatherAlert.ACTION_FINISHED_SYNC));
 
     }
 
