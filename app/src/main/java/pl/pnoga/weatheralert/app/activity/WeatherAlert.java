@@ -19,6 +19,7 @@ import pl.pnoga.weatheralert.app.dao.MeasurementDAO;
 import pl.pnoga.weatheralert.app.dao.StationDAO;
 import pl.pnoga.weatheralert.app.dao.ThreatDAO;
 import pl.pnoga.weatheralert.app.service.LocationService;
+import pl.pnoga.weatheralert.app.utils.ThreatComparator;
 
 import static android.content.ContentResolver.setIsSyncable;
 
@@ -118,7 +119,9 @@ public class WeatherAlert extends Activity {
         if (id == R.id.refresh_settings) {
             threatsAdapter.clear();
             threatsAdapter.addAll(threatDAO.getAllThreats());
+            threatsAdapter.sort(new ThreatComparator());
             threatsAdapter.notifyDataSetChanged();
+            stationCount.setText("Ilość stacji w zasiegu: " + stationDAO.getStations().size());
             return true;
         }
         if (id == R.id.sync_settings) {
