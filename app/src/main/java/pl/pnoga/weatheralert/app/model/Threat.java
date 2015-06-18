@@ -5,6 +5,7 @@ public class Threat {
     private int code;
     private String message;
     private Station station;
+    private String time;
 
     public int getCode() {
         return code;
@@ -28,5 +29,13 @@ public class Threat {
 
     public void setStation(Station station) {
         this.station = station;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 }

@@ -3,25 +3,31 @@ package pl.pnoga.weatheralert.app.synchronization;
 import android.accounts.Account;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.*;
 import android.location.Location;
-import android.media.RingtoneManager;
 import android.os.Bundle;
 import android.util.Log;
 import pl.pnoga.weatheralert.app.R;
+import pl.pnoga.weatheralert.app.activity.WeatherAlert;
 import pl.pnoga.weatheralert.app.dao.MeasurementDAO;
 import pl.pnoga.weatheralert.app.dao.StationDAO;
-import pl.pnoga.weatheralert.app.model.Station;
-import pl.pnoga.weatheralert.app.model.StationList;
+import pl.pnoga.weatheralert.app.dao.ThreatDAO;
+import pl.pnoga.weatheralert.app.model.*;
 import pl.pnoga.weatheralert.app.service.LocationService;
+import pl.pnoga.weatheralert.app.utils.Constants;
 import pl.pnoga.weatheralert.app.utils.Haversine;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private final String TAG = "SyncAdapter";
     ContentResolver mContentResolver;
+    private StationDAO stationDAO;
+    private MeasurementDAO measurementDAO;
+    private ThreatDAO threatDAO;
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
         mContentResolver = context.getContentResolver();
@@ -47,8 +53,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Log.d(TAG, "performSync");
         Location location = updateLocation();
         ServerDataProvider serverDataProvider = new ServerDataProvider();
-        StationDAO stationDAO = new StationDAO(getContext());
-        MeasurementDAO measurementDAO = new MeasurementDAO(getContext());
+        stationDAO = new StationDAO(getContext());
+        measurementDAO = new MeasurementDAO(getContext());
         measurementDAO.open();
         stationDAO.open();
         stationDAO.saveStations(serverDataProvider.getStations());
@@ -57,8 +63,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         for (String stationName : stationsInRadius) {
             measurementDAO.saveMeasurements(serverDataProvider.getWeatherMeasurements(stationName));
         }
-
-        notifyUser();
+        createThreatDataAndSaveToDB();
         stationDAO.close();
         measurementDAO.close();
     }
@@ -79,37 +84,65 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         return locationService.getLocation();
     }
 
+    private void createThreatDataAndSaveToDB() {
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(System.currentTimeMillis());
+        c.add(Calendar.DAY_OF_YEAR, -14);
+        WeatherMeasurementList weatherMeasurements = measurementDAO.getMeasurmentsAfterDate(c.getTime());
+        Log.d(TAG, "Measurment count " + weatherMeasurements.size());
+        List<String> distinctStations = new ArrayList<>();
+        ThreatList threats = new ThreatList();
+        int i = 0;
+        for (WeatherMeasurement weatherMeasurement : weatherMeasurements) {
+            if (!distinctStations.contains(weatherMeasurement.getStation())) {
+                distinctStations.add(weatherMeasurement.getStation());
+                Threat threat = new Threat();
+                threat.setStation(stationDAO.getStationsById(weatherMeasurement.getStation()));
+                threat.setTime(weatherMeasurement.getTime());
+                if (i % 2 == 0) {
+                    threat.setCode(Constants.CODE_RED);
+                    threat.setMessage("Silny wiatr");
+                } else if (i % 3 == 0) {
+                    threat.setCode(Constants.CODE_YELLOW);
+                    threat.setMessage("Gwałtowny spadek ciśnienia, możliwa burza");
+                } else {
+                    threat.setCode(Constants.CODE_GREEN);
+                    threat.setMessage("Brak niebezpieczeństw");
+                }
+                threats.add(threat);
+            }
+            ++i;
+        }
+        Log.d(TAG, "Distinct count " + distinctStations.size());
+        threatDAO = new ThreatDAO(getContext());
+        threatDAO.open();
+        threatDAO.saveThreats(threats);
+        threatDAO.close();
+        notifyUser(threats.size());
+    }
 
-    private void notifyUser() {
-        long[] pattern = {500, 500, 500, 500, 500, 500, 500, 500, 500};
+    private void notifyUser(int alertCount) {
+
+        Intent intent = new Intent(getContext(), WeatherAlert.class);
+        PendingIntent pIntent = PendingIntent.getActivity(getContext(), 0, intent, 0);
         NotificationManager notificationManager =
                 (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
         Notification red = new Notification.Builder(getContext())
-                .setContentTitle("Wykryto zagrożenie!!")
-                .setContentText("Burza")
+                .setContentTitle("Wykryto zagrożenia!!")
+                .setContentText("Kliknij aby zobaczyć")
                 .setSmallIcon(R.mipmap.red)
                 .setAutoCancel(true)
-                .setVibrate(pattern)
-                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                .setContentIntent(pIntent)
                 .build();
         Notification yellow = new Notification.Builder(getContext())
                 .setContentTitle("Możliwe zagrożenie!!")
-                .setContentText("Wiatr")
+                .setContentText("Kliknij aby zobaczyć")
                 .setSmallIcon(R.mipmap.yellow)
-                .setVibrate(pattern)
-                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                .setAutoCancel(true).build();
-        Notification green = new Notification.Builder(getContext())
-                .setContentTitle("Brak zagrożeń!!")
-                .setVibrate(pattern)
-                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                .setSmallIcon(R.mipmap.green)
+                .setContentIntent(pIntent)
                 .setAutoCancel(true).build();
 
         notificationManager.notify(0, red);
         notificationManager.notify(1, yellow);
-        notificationManager.notify(2, green);
-
 
     }
 

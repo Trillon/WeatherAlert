@@ -17,7 +17,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
             "UNIQUE(station) ON CONFLICT IGNORE);";
     private final String CREATE_MEASURMENTS_TABLE = "CREATE TABLE measurements(" +
             "station text not null," +
-            "time date not null, " +
+            "time datetime not null, " +
             "pressure double," +
             "temperature double," +
             "dewPointTemperature double," +
@@ -27,11 +27,17 @@ public class DatabaseManager extends SQLiteOpenHelper {
             "windDirection double," +
             "windSpeed double," +
             "momentaryWindSpeed double, " +
-            "UNIQUE(station, time) ON CONFLICT REPLACE);";
+            "UNIQUE(station, time) ON CONFLICT IGNORE);";
+    private final String CREATE_THREATS_TABLE = "CREATE TABLE threats(" +
+            "code int," +
+            "message text," +
+            "time datetime," +
+            "station text," +
+            "FOREIGN KEY(station) REFERENCES stations(station));";
 
     private final String DROP_STATIONS = "DROP TABLE IF EXISTS stations;";
     private final String DROP_MEASURMENTS = "DROP TABLE IF EXISTS measurements;";
-
+    private final String DROP_THREATS = "DROP TABLE IF EXISTS threats;";
     public DatabaseManager(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -40,12 +46,14 @@ public class DatabaseManager extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_STATIONS_TABLE);
         db.execSQL(CREATE_MEASURMENTS_TABLE);
+        db.execSQL(CREATE_THREATS_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(DROP_STATIONS);
         db.execSQL(DROP_MEASURMENTS);
+        db.execSQL(DROP_THREATS);
         onCreate(db);
     }
 

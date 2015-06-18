@@ -37,7 +37,7 @@ public class ThreatsAdapter extends ArrayAdapter<Threat> {
                 icon.setImageResource(R.mipmap.green);
                 break;
         }
-        message.setText(threat.getMessage());
+        message.setText(threat.getTime() + "\n" + threat.getMessage() + "\n" + threat.getStation().getName());
         return convertView;
     }
 }

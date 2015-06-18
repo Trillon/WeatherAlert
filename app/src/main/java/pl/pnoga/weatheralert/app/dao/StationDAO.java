@@ -66,4 +66,19 @@ public class StationDAO extends TableDAO {
         cursor.close();
         return stations;
     }
+
+    public Station getStationsById(String stationName) {
+        Station station = new Station();
+        Cursor cursor = database.query(TABLE_NAME,
+                new String[]{"name", "station", "lati", "long", "alti"}, "station = \"" + stationName + "\"", null, null, null, null);
+        cursor.moveToFirst();
+        station.setName(cursor.getString(0));
+        station.setStation(cursor.getString(1));
+        station.setLati(cursor.getDouble(2));
+        station.setLongi(cursor.getDouble(3));
+        station.setAlti(cursor.getDouble(4));
+        cursor.moveToNext();
+        cursor.close();
+        return station;
+    }
 }

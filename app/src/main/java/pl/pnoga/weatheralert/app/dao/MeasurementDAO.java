@@ -2,9 +2,14 @@ package pl.pnoga.weatheralert.app.dao;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.util.Log;
+import pl.pnoga.weatheralert.app.model.WeatherData;
 import pl.pnoga.weatheralert.app.model.WeatherMeasurement;
+import pl.pnoga.weatheralert.app.model.WeatherMeasurementList;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class MeasurementDAO extends TableDAO {
@@ -37,4 +42,30 @@ public class MeasurementDAO extends TableDAO {
         Log.d(TAG, "Saved " + counter + " measurements");
     }
 
+    public WeatherMeasurementList getMeasurmentsAfterDate(Date date) {
+        WeatherMeasurementList weatherMeasurements = new WeatherMeasurementList();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Cursor cursor = database.query(TABLE_NAME,
+                new String[]{"station", "time", "pressure", "temperature", "dewPointTemperature", "moisture", "lastHourDrop", "showers", "windDirection", "windSpeed", "momentaryWindSpeed"}, " time > \"" + simpleDateFormat.format(date) + "\"", null, null, null, null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            WeatherMeasurement weatherMeasurement = new WeatherMeasurement();
+            weatherMeasurement.setStation(cursor.getString(0));
+            weatherMeasurement.setTime(cursor.getString(1));
+            weatherMeasurement.setData(new WeatherData());
+            weatherMeasurement.getData().setPressure(cursor.getDouble(2));
+            weatherMeasurement.getData().setTemperature(cursor.getDouble(3));
+            weatherMeasurement.getData().setDewPointTemperature(cursor.getDouble(4));
+            weatherMeasurement.getData().setMoisture(cursor.getDouble(5));
+            weatherMeasurement.getData().setLastHourDrop(cursor.getDouble(6));
+            weatherMeasurement.getData().setShowers(cursor.getDouble(7));
+            weatherMeasurement.getData().setWindDirection(cursor.getDouble(8));
+            weatherMeasurement.getData().setWindSpeed(cursor.getDouble(9));
+            weatherMeasurement.getData().setMomentaryWindSpeed(cursor.getDouble(10));
+            weatherMeasurements.add(weatherMeasurement);
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return weatherMeasurements;
+    }
 }
