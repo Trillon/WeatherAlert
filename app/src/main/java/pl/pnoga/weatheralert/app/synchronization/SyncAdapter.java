@@ -58,7 +58,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         measurementDAO.open();
         stationDAO.open();
         stationDAO.saveStations(serverDataProvider.getStations());
-        for (String stationName : ThreatFinder.getStationsInRadius(stationDAO.getStations(), location, false)) {
+        for (String stationName : ThreatFinder.getAllStationInRadius(stationDAO.getStations(), location)) {
             measurementDAO.saveMeasurements(serverDataProvider.getWeatherMeasurements(stationName));
         }
         createThreatDataAndSaveToDB();

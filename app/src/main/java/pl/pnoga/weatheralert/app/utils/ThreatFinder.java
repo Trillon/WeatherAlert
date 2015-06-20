@@ -11,8 +11,8 @@ import java.util.List;
 public class ThreatFinder {
     private static final double CRIT_MAX_TEMPERATURE = 25.0;
     private static final double CRIT_MIN_TEMPERATURE = -15.0;
-    private static final double CRIT_WIND_SPEED = 20.0;
-    private static final double CRIT_SHOWER = 20.0;
+    private static final double CRIT_WIND_SPEED = 25.0;
+    private static final double CRIT_SHOWER = 30.0;
     private static final double MAX_RADIUS = 20.0;
     private static final double MAX_CLOSE_RADIUS = 10.0;
 
@@ -90,8 +90,8 @@ public class ThreatFinder {
         double shower = 0.0;
 
         for (WeatherMeasurement weatherMeasurement : weatherMeasurements) {
-            if (weatherMeasurement.getData().getShowers() > CRIT_SHOWER) {
-                shower = weatherMeasurement.getData().getShowers();
+            if (weatherMeasurement.getData().getLastHourDrop() > CRIT_SHOWER) {
+                shower = weatherMeasurement.getData().getLastHourDrop();
                 threat.setCode(close ? Constants.CODE_RED : Constants.CODE_YELLOW);
                 threat.setTime(weatherMeasurement.getTime());
                 threat.setMessage("Obfite opady: " + shower);
