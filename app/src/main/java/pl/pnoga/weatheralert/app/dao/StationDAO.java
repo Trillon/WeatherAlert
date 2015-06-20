@@ -67,7 +67,7 @@ public class StationDAO extends TableDAO {
         return stations;
     }
 
-    public Station getStationsById(String stationName) {
+    public Station getStationById(String stationName) {
         Station station = new Station();
         Cursor cursor = database.query(TABLE_NAME,
                 new String[]{"name", "station", "lati", "long", "alti"}, "station = \"" + stationName + "\"", null, null, null, null);

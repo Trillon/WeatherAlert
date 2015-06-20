@@ -16,6 +16,7 @@ public class ThreatDAO extends TableDAO {
     }
 
     public void saveThreats(ThreatList threats) {
+        deleteAll();
         int counter = 0;
         for (Threat threat : threats) {
             ContentValues values = new ContentValues();
@@ -42,7 +43,7 @@ public class ThreatDAO extends TableDAO {
             threat.setCode(cursor.getInt(0));
             threat.setMessage(cursor.getString(1));
             threat.setTime(cursor.getString(2));
-            threat.setStation(stationDAO.getStationsById(cursor.getString(3)));
+            threat.setStation(stationDAO.getStationById(cursor.getString(3)));
             threats.add(threat);
             cursor.moveToNext();
         }

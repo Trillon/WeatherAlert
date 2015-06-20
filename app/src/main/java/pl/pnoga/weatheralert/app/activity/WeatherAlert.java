@@ -20,6 +20,7 @@ import pl.pnoga.weatheralert.app.dao.StationDAO;
 import pl.pnoga.weatheralert.app.dao.ThreatDAO;
 import pl.pnoga.weatheralert.app.service.LocationService;
 import pl.pnoga.weatheralert.app.utils.ThreatComparator;
+import pl.pnoga.weatheralert.app.utils.ThreatFinder;
 
 import static android.content.ContentResolver.setIsSyncable;
 
@@ -38,6 +39,7 @@ public class WeatherAlert extends Activity {
     private MeasurementDAO measurementDAO;
     private ThreatDAO threatDAO;
     private ProgressDialog Dialog;
+    private LocationService locationService;
     private BroadcastReceiver syncBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -76,15 +78,15 @@ public class WeatherAlert extends Activity {
         stationDAO.open();
         measurementDAO.open();
         threatDAO.open();
-        LocationService locationService = new LocationService(this);
+        locationService = new LocationService(this);
         Location location = locationService.getLocation();
         userCoordinates = (TextView) findViewById(R.id.txt_user_coordinates);
         stationCount = (TextView) findViewById(R.id.txt_station_count);
         String s = "Obecna lokacja:\n" + locationStringFromLocation(location);
         SpannableString ss1 = new SpannableString(s);
-        ss1.setSpan(new RelativeSizeSpan(2f), 16, s.length(), 0);
+        ss1.setSpan(new RelativeSizeSpan(1f), 16, s.length(), 0);
         userCoordinates.setText(ss1);
-        stationCount.setText("Ilość stacji w zasiegu: " + stationDAO.getStations().size());
+        stationCount.setText("Ilość stacji w zasiegu: " + ThreatFinder.getAllStationInRadius(stationDAO.getStations(), location).size());
         ListView threats = (ListView) findViewById(R.id.lv_threats);
         threatsAdapter = new ThreatsAdapter(this, threatDAO.getAllThreats());
         threats.setAdapter(threatsAdapter);
@@ -129,10 +131,6 @@ public class WeatherAlert extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.refresh_settings) {
-            updateView();
-            return true;
-        }
         if (id == R.id.sync_settings) {
             Dialog.setMessage("Trwa synchronizacja...");
             Dialog.show();
@@ -153,6 +151,6 @@ public class WeatherAlert extends Activity {
         threatsAdapter.addAll(threatDAO.getAllThreats());
         threatsAdapter.sort(new ThreatComparator());
         threatsAdapter.notifyDataSetChanged();
-        stationCount.setText("Ilość stacji w zasiegu: " + stationDAO.getStations().size());
+        stationCount.setText("Ilość stacji w zasiegu: " + ThreatFinder.getAllStationInRadius(stationDAO.getStations(), locationService.getLocation()).size());
     }
 }

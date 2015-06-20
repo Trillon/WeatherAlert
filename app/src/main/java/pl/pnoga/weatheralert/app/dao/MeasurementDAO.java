@@ -42,11 +42,11 @@ public class MeasurementDAO extends TableDAO {
         Log.d(TAG, "Saved " + counter + " measurements");
     }
 
-    public WeatherMeasurementList getMeasurmentsAfterDate(Date date) {
+    public WeatherMeasurementList getMeasurmentsAfterDateForStation(Date date, String stationName) {
         WeatherMeasurementList weatherMeasurements = new WeatherMeasurementList();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Cursor cursor = database.query(TABLE_NAME,
-                new String[]{"station", "time", "pressure", "temperature", "dewPointTemperature", "moisture", "lastHourDrop", "showers", "windDirection", "windSpeed", "momentaryWindSpeed"}, " time > \"" + simpleDateFormat.format(date) + "\"", null, null, null, null);
+                new String[]{"station", "time", "pressure", "temperature", "dewPointTemperature", "moisture", "lastHourDrop", "showers", "windDirection", "windSpeed", "momentaryWindSpeed"}, " time > \"" + simpleDateFormat.format(date) + "\" AND station =\"" + stationName + "\"", null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             WeatherMeasurement weatherMeasurement = new WeatherMeasurement();
