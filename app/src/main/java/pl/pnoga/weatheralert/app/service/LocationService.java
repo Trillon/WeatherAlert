@@ -9,6 +9,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 
 public class LocationService extends Service implements LocationListener {
@@ -29,7 +30,7 @@ public class LocationService extends Service implements LocationListener {
     public Location getLocation() {
         if (locationManager.isProviderEnabled(provider)) {
             locationManager.requestLocationUpdates(provider,
-                    MIN_TIME_FOR_UPDATE, MIN_DISTANCE_FOR_UPDATE, this);
+                    MIN_TIME_FOR_UPDATE, MIN_DISTANCE_FOR_UPDATE, this, Looper.getMainLooper());
             if (locationManager != null) {
                 location = locationManager.getLastKnownLocation(provider);
                 return location;
