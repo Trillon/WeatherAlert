@@ -34,7 +34,7 @@ public class ThreatFinder {
         if (threats.size() == 0) {
             Threat threat = new Threat();
             threat.setCode(Constants.CODE_GREEN);
-            threat.setMessage("Brak zagrożen ze stacji:");
+            threat.setMessage("Brak zagrożeń ze stacji:");
             threat.setStation(station);
             threat.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(getLatestDate(weatherMeasurements)));
             threats.add(threat);
@@ -101,7 +101,7 @@ public class ThreatFinder {
                 maxWindSpeed = weatherMeasurement.getData().getWindSpeed();
                 threat.setCode(close ? Constants.CODE_RED : Constants.CODE_YELLOW);
                 threat.setTime(weatherMeasurement.getTime());
-                threat.setMessage("Niebezpieczna prędkośc wiatru: " + maxWindSpeed);
+                threat.setMessage("Niebezpieczna prędkość wiatru: " + maxWindSpeed);
                 threat.setStation(station);
             }
         }
