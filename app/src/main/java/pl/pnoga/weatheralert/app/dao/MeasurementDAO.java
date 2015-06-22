@@ -68,4 +68,29 @@ public class MeasurementDAO extends TableDAO {
         cursor.close();
         return weatherMeasurements;
     }
+
+    public WeatherMeasurement getMeasurmentsForStation(String stationName) {
+        WeatherMeasurement weatherMeasurement = new WeatherMeasurement();
+        Cursor cursor = database.query(TABLE_NAME,
+                new String[]{"station", "time", "pressure", "temperature", "dewPointTemperature", "moisture", "lastHourDrop", "showers", "windDirection", "windSpeed", "momentaryWindSpeed"}, " station =\"" + stationName + "\"", null, null, null, " time DESC", " 1");
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+
+            weatherMeasurement.setStation(cursor.getString(0));
+            weatherMeasurement.setTime(cursor.getString(1));
+            weatherMeasurement.setData(new WeatherData());
+            weatherMeasurement.getData().setPressure(cursor.getDouble(2));
+            weatherMeasurement.getData().setTemperature(cursor.getDouble(3));
+            weatherMeasurement.getData().setDewPointTemperature(cursor.getDouble(4));
+            weatherMeasurement.getData().setMoisture(cursor.getDouble(5));
+            weatherMeasurement.getData().setLastHourDrop(cursor.getDouble(6));
+            weatherMeasurement.getData().setShowers(cursor.getDouble(7));
+            weatherMeasurement.getData().setWindDirection(cursor.getDouble(8));
+            weatherMeasurement.getData().setWindSpeed(cursor.getDouble(9));
+            weatherMeasurement.getData().setMomentaryWindSpeed(cursor.getDouble(10));
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return weatherMeasurement;
+    }
 }

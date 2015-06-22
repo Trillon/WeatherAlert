@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:stretchColumns="1">
+
+    <TableRow>
+        <TextView
+                android:layout_column="1"
+                android:text="Godzina pomiaru"
+                android:padding="3dip"/>
+        <TextView
+                android:id="@+id/dialog_time"
+                android:gravity="right"
+                android:padding="3dip"/>
+    </TableRow>
+
+    <TableRow>
+        <TextView
+                android:layout_column="1"
+                android:text="Ciśnienie"
+                android:padding="3dip"/>
+        <TextView
+                android:id="@+id/dialog_pressure"
+                android:gravity="right"
+                android:padding="3dip"/>
+    </TableRow>
+
+    <TableRow>
+        <TextView
+                android:layout_column="1"
+                android:text="Temperatura"
+                android:padding="3dip"/>
+        <TextView
+                android:id="@+id/dialog_temperature"
+                android:gravity="right"
+                android:padding="3dip"/>
+    </TableRow>
+    <TableRow>
+        <TextView
+                android:layout_column="1"
+                android:text="Wilgotność"
+                android:padding="3dip"/>
+        <TextView
+                android:id="@+id/dialog_moisture"
+                android:gravity="right"
+                android:padding="3dip"/>
+    </TableRow>
+    <TableRow>
+        <TextView
+                android:layout_column="1"
+                android:text="Opady"
+                android:padding="3dip"/>
+        <TextView
+                android:id="@+id/dialog_shower"
+                android:gravity="right"
+                android:padding="3dip"/>
+    </TableRow>
+    <TableRow>
+        <TextView
+                android:layout_column="1"
+                android:text="Prędkość wiatru"
+                android:padding="3dip"/>
+        <TextView
+                android:id="@+id/dialog_wind_speed"
+                android:gravity="right"
+                android:padding="3dip"/>
+    </TableRow>
+    <TableRow android:layout_width="match_parent">
+        <Button
+                android:id="@+id/dialog_button"
+                android:layout_column="1"
+                android:text="Wróć"
+                android:padding="3dip" android:layout_width="match_parent"/>
+    </TableRow>
+
+</TableLayout>

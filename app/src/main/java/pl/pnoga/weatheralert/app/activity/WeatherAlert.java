@@ -3,6 +3,7 @@ package pl.pnoga.weatheralert.app.activity;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.*;
 import android.location.Location;
@@ -11,6 +12,9 @@ import android.text.SpannableString;
 import android.text.style.RelativeSizeSpan;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import pl.pnoga.weatheralert.app.R;
@@ -18,6 +22,7 @@ import pl.pnoga.weatheralert.app.adapter.ThreatsAdapter;
 import pl.pnoga.weatheralert.app.dao.MeasurementDAO;
 import pl.pnoga.weatheralert.app.dao.StationDAO;
 import pl.pnoga.weatheralert.app.dao.ThreatDAO;
+import pl.pnoga.weatheralert.app.model.WeatherMeasurement;
 import pl.pnoga.weatheralert.app.service.LocationService;
 import pl.pnoga.weatheralert.app.utils.ThreatComparator;
 import pl.pnoga.weatheralert.app.utils.ThreatFinder;
@@ -38,13 +43,13 @@ public class WeatherAlert extends Activity {
     private StationDAO stationDAO;
     private MeasurementDAO measurementDAO;
     private ThreatDAO threatDAO;
-    private ProgressDialog Dialog;
+    private ProgressDialog progressDialog;
     private LocationService locationService;
     private BroadcastReceiver syncBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             updateView();
-            Dialog.dismiss();
+            progressDialog.dismiss();
         }
     };
 
@@ -86,11 +91,41 @@ public class WeatherAlert extends Activity {
         SpannableString ss1 = new SpannableString(s);
         ss1.setSpan(new RelativeSizeSpan(1f), 16, s.length(), 0);
         userCoordinates.setText(ss1);
-        stationCount.setText("Ilość stacji w zasiegu: " + ThreatFinder.getAllStationInRadius(stationDAO.getStations(), location).size());
         ListView threats = (ListView) findViewById(R.id.lv_threats);
         threatsAdapter = new ThreatsAdapter(this, threatDAO.getAllThreats());
         threats.setAdapter(threatsAdapter);
-        Dialog = new ProgressDialog(this);
+        updateView();
+        threats.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                WeatherMeasurement weatherMeasurement = measurementDAO.getMeasurmentsForStation(threatsAdapter.getItem(position).getStation().getStation());
+                final Dialog dialog = new Dialog(WeatherAlert.this);
+                dialog.setContentView(R.layout.details_dialog);
+                dialog.setTitle("Ostatni pomiar");
+                TextView time = (TextView) dialog.findViewById(R.id.dialog_time);
+                TextView temperature = (TextView) dialog.findViewById(R.id.dialog_temperature);
+                TextView pressure = (TextView) dialog.findViewById(R.id.dialog_pressure);
+                TextView moisture = (TextView) dialog.findViewById(R.id.dialog_moisture);
+                TextView shower = (TextView) dialog.findViewById(R.id.dialog_shower);
+                TextView wind_speed = (TextView) dialog.findViewById(R.id.dialog_wind_speed);
+                time.setText(weatherMeasurement.getTime());
+                temperature.setText(weatherMeasurement.getData().getTemperature() + " °C");
+                pressure.setText(weatherMeasurement.getData().getPressure() + " hPa");
+                moisture.setText(weatherMeasurement.getData().getMoisture() + " %");
+                shower.setText(weatherMeasurement.getData().getShowers() + " mm");
+                wind_speed.setText(weatherMeasurement.getData().getWindSpeed() + " m/s");
+                Button dialogButton = (Button) dialog.findViewById(R.id.dialog_button);
+                dialogButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                    }
+                });
+
+                dialog.show();
+            }
+        });
+        progressDialog = new ProgressDialog(this);
     }
 
     @Override
@@ -132,8 +167,8 @@ public class WeatherAlert extends Activity {
         int id = item.getItemId();
 
         if (id == R.id.sync_settings) {
-            Dialog.setMessage("Trwa synchronizacja...");
-            Dialog.show();
+            progressDialog.setMessage("Trwa synchronizacja...");
+            progressDialog.show();
             Bundle settingsBundle = new Bundle();
             settingsBundle.putBoolean(
                     ContentResolver.SYNC_EXTRAS_MANUAL, true);

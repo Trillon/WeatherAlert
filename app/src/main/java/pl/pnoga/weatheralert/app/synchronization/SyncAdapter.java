@@ -49,7 +49,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             String authority,
             ContentProviderClient provider,
             SyncResult syncResult) {
-
+        try {
         Log.d(TAG, "performSync");
         location = updateLocation();
         ServerDataProvider serverDataProvider = new ServerDataProvider();
@@ -63,7 +63,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
         createThreatDataAndSaveToDB();
         stationDAO.close();
-        measurementDAO.close();
+            measurementDAO.close();
+        } catch (Exception e) {
+            Log.e(TAG, e.getLocalizedMessage());
+            getContext().sendBroadcast(new Intent(WeatherAlert.ACTION_FINISHED_SYNC));
+        }
         getContext().sendBroadcast(new Intent(WeatherAlert.ACTION_FINISHED_SYNC));
     }
 
@@ -104,7 +108,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
         if (alarmCount > 0) {
         Notification red = new Notification.Builder(getContext())
-                .setContentTitle("Wykryto zagrożenia" + alarmCount + warningCount + "!!")
+                .setContentTitle("Wykryto zagrożenia (" + alarmCount + warningCount + ")!!")
                 .setContentText("Kliknij aby zobaczyć")
                 .setSmallIcon(R.mipmap.red)
                 .setAutoCancel(true)
@@ -113,7 +117,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             notificationManager.notify(0, red);
         } else if (warningCount > 0) {
         Notification yellow = new Notification.Builder(getContext())
-                .setContentTitle("Możliwe zagrożenie" + warningCount + "!!")
+                .setContentTitle("Możliwe zagrożenie (" + warningCount + ")!!")
                 .setContentText("Kliknij aby zobaczyć")
                 .setSmallIcon(R.mipmap.yellow)
                 .setContentIntent(pIntent)

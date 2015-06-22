@@ -3,6 +3,7 @@ package pl.pnoga.weatheralert.app.utils;
 import android.location.Location;
 import pl.pnoga.weatheralert.app.model.*;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -18,6 +19,14 @@ public class ThreatFinder {
 
     public static ThreatList getThreatsForStation(WeatherMeasurementList weatherMeasurements, Station station, boolean close) {
         ThreatList threats = new ThreatList();
+        if (weatherMeasurements.isEmpty()) {
+            Threat threat = new Threat();
+            threat.setCode(Constants.CODE_YELLOW);
+            threat.setMessage("Nie znaleziono aktualnych pomiarów dla stacji:");
+            threat.setStation(station);
+            threat.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+            threats.add(threat);
+        } else {
         threats.addAll(getWindThreat(weatherMeasurements, station, close));
         threats.addAll(getShowerThreat(weatherMeasurements, station, close));
         threats.addAll(getStormThreat(weatherMeasurements, station, close));
@@ -25,12 +34,29 @@ public class ThreatFinder {
         if (threats.size() == 0) {
             Threat threat = new Threat();
             threat.setCode(Constants.CODE_GREEN);
-            threat.setMessage("Brak zagrożen ze stacji");
+            threat.setMessage("Brak zagrożen ze stacji:");
             threat.setStation(station);
-            threat.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+            threat.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(getLatestDate(weatherMeasurements)));
             threats.add(threat);
         }
+        }
         return threats;
+    }
+
+    private static Date getLatestDate(WeatherMeasurementList weatherMeasurements) {
+        Date returnDate = new Date(0);
+        for (WeatherMeasurement weatherMeasurement : weatherMeasurements) {
+            Date currentDate = new Date(0);
+            try {
+                currentDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(weatherMeasurement.getTime());
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            if (returnDate.before(currentDate)) {
+                returnDate = currentDate;
+            }
+        }
+        return returnDate;
     }
 
     public static List<String> getStationsInRadius(StationList stations, Location location, boolean close) {
