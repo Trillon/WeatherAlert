@@ -187,7 +187,7 @@ public class WeatherAlert extends Activity {
             dialog.setContentView(R.layout.about_dialog);
             dialog.setTitle("O aplikacji");
             TextView about = (TextView) dialog.findViewById(R.id.txt_about);
-            about.setText("Aplikacja została stworzona w ramach pracy inżynierskiej realizowanej na Wydziale Fizyki i Informatyki Stosowanej AGH w Krakowie\n\nDane pogodowe pochodzą z serwisu realizowanego w ramach programu \"Małopolska Chmira Edukacyjna\"");
+            about.setText("Aplikacja została stworzona w ramach pracy inżynierskiej realizowanej na Wydziale Fizyki i Informatyki Stosowanej AGH w Krakowie\n\nDane pogodowe pochodzą z serwisu realizowanego w ramach programu \"Małopolska Chmura Edukacyjna\"");
 
             dialog.show();
             return true;
