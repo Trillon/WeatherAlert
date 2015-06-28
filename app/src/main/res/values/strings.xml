@@ -5,4 +5,5 @@
     <string name="refresh_settings">Odśwież</string>
     <string name="sync_settings">Synchronizuj</string>
     <string name="txt_message">KOMUNIKATY</string>
+    <string name="info_settings">O aplikacji</string>
 </resources>

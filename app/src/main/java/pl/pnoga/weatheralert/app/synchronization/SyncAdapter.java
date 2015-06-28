@@ -108,7 +108,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
         if (alarmCount > 0) {
         Notification red = new Notification.Builder(getContext())
-                .setContentTitle("Wykryto zagrożenia (" + alarmCount + warningCount + ")!!")
+                .setContentTitle("Wykryto zagrożenia (" + (alarmCount + warningCount) + ")!!")
                 .setContentText("Kliknij aby zobaczyć")
                 .setSmallIcon(R.mipmap.red)
                 .setAutoCancel(true)

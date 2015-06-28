@@ -10,9 +10,9 @@ import java.util.Date;
 import java.util.List;
 
 public class ThreatFinder {
-    private static final double CRIT_MAX_TEMPERATURE = 25.0;
+    private static final double CRIT_MAX_TEMPERATURE = 30.0;
     private static final double CRIT_MIN_TEMPERATURE = -15.0;
-    private static final double CRIT_WIND_SPEED = 25.0;
+    private static final double CRIT_WIND_SPEED = 20.0;
     private static final double CRIT_SHOWER = 30.0;
     private static final double MAX_RADIUS = 20.0;
     private static final double MAX_CLOSE_RADIUS = 10.0;

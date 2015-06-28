@@ -70,12 +70,12 @@ public class MeasurementDAO extends TableDAO {
     }
 
     public WeatherMeasurement getMeasurmentsForStation(String stationName) {
-        WeatherMeasurement weatherMeasurement = new WeatherMeasurement();
+        WeatherMeasurement weatherMeasurement = null;
         Cursor cursor = database.query(TABLE_NAME,
                 new String[]{"station", "time", "pressure", "temperature", "dewPointTemperature", "moisture", "lastHourDrop", "showers", "windDirection", "windSpeed", "momentaryWindSpeed"}, " station =\"" + stationName + "\"", null, null, null, " time DESC", " 1");
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-
+            weatherMeasurement = new WeatherMeasurement();
             weatherMeasurement.setStation(cursor.getString(0));
             weatherMeasurement.setTime(cursor.getString(1));
             weatherMeasurement.setData(new WeatherData());

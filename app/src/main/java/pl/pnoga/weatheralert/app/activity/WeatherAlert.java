@@ -36,6 +36,7 @@ public class WeatherAlert extends Activity {
     public static final String ACCOUNT = "WeatherAlert";
     public static final String ACTION_FINISHED_SYNC = "pl.pnoga.weatheralert.app.activity.ACTION_FINISHED_SYNC";
     private static IntentFilter syncIntentFilter = new IntentFilter(ACTION_FINISHED_SYNC);
+    private final int SYNC_INTERVAL = 30 * 60;
     private final String TAG = "WeatherAlert";
     Account mAccount;
     TextView userCoordinates, stationCount;
@@ -77,6 +78,7 @@ public class WeatherAlert extends Activity {
         mAccount = CreateSyncAccount(this);
         ContentResolver.setSyncAutomatically(mAccount, AUTHORITY, true);
         ContentResolver.setIsSyncable(mAccount, AUTHORITY, 1);
+        ContentResolver.addPeriodicSync(mAccount, AUTHORITY, Bundle.EMPTY, SYNC_INTERVAL);
         stationDAO = new StationDAO(this);
         measurementDAO = new MeasurementDAO(this);
         threatDAO = new ThreatDAO(this);
@@ -100,28 +102,31 @@ public class WeatherAlert extends Activity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 WeatherMeasurement weatherMeasurement = measurementDAO.getMeasurmentsForStation(threatsAdapter.getItem(position).getStation().getStation());
                 final Dialog dialog = new Dialog(WeatherAlert.this);
-                dialog.setContentView(R.layout.details_dialog);
-                dialog.setTitle("Ostatni pomiar");
-                TextView time = (TextView) dialog.findViewById(R.id.dialog_time);
-                TextView temperature = (TextView) dialog.findViewById(R.id.dialog_temperature);
-                TextView pressure = (TextView) dialog.findViewById(R.id.dialog_pressure);
-                TextView moisture = (TextView) dialog.findViewById(R.id.dialog_moisture);
-                TextView shower = (TextView) dialog.findViewById(R.id.dialog_shower);
-                TextView wind_speed = (TextView) dialog.findViewById(R.id.dialog_wind_speed);
-                time.setText(weatherMeasurement.getTime());
-                temperature.setText(weatherMeasurement.getData().getTemperature() + " °C");
-                pressure.setText(weatherMeasurement.getData().getPressure() + " hPa");
-                moisture.setText(weatherMeasurement.getData().getMoisture() + " %");
-                shower.setText(weatherMeasurement.getData().getShowers() + " mm");
-                wind_speed.setText(weatherMeasurement.getData().getWindSpeed() + " m/s");
-                Button dialogButton = (Button) dialog.findViewById(R.id.dialog_button);
-                dialogButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.dismiss();
-                    }
-                });
-
+                if (weatherMeasurement != null) {
+                    dialog.setContentView(R.layout.details_dialog);
+                    dialog.setTitle("Ostatni pomiar");
+                    TextView time = (TextView) dialog.findViewById(R.id.dialog_time);
+                    TextView temperature = (TextView) dialog.findViewById(R.id.dialog_temperature);
+                    TextView pressure = (TextView) dialog.findViewById(R.id.dialog_pressure);
+                    TextView moisture = (TextView) dialog.findViewById(R.id.dialog_moisture);
+                    TextView shower = (TextView) dialog.findViewById(R.id.dialog_shower);
+                    TextView wind_speed = (TextView) dialog.findViewById(R.id.dialog_wind_speed);
+                    time.setText(weatherMeasurement.getTime());
+                    temperature.setText(weatherMeasurement.getData().getTemperature() + " °C");
+                    pressure.setText(weatherMeasurement.getData().getPressure() + " hPa");
+                    moisture.setText(weatherMeasurement.getData().getMoisture() + " %");
+                    shower.setText(weatherMeasurement.getData().getShowers() + " mm");
+                    wind_speed.setText(weatherMeasurement.getData().getWindSpeed() + " m/s");
+                    Button dialogButton = (Button) dialog.findViewById(R.id.dialog_button);
+                    dialogButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            dialog.dismiss();
+                        }
+                    });
+                } else {
+                    dialog.setTitle("Brak pomiarów dla stacji");
+                }
                 dialog.show();
             }
         });
@@ -175,6 +180,16 @@ public class WeatherAlert extends Activity {
             settingsBundle.putBoolean(
                     ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
             ContentResolver.requestSync(mAccount, AUTHORITY, settingsBundle);
+            return true;
+        }
+        if (id == R.id.info_settings) {
+            final Dialog dialog = new Dialog(WeatherAlert.this);
+            dialog.setContentView(R.layout.about_dialog);
+            dialog.setTitle("O aplikacji");
+            TextView about = (TextView) dialog.findViewById(R.id.txt_about);
+            about.setText("Aplikacja została stworzona w ramach pracy inżynierskiej realizowanej na Wydziale Fizyki i Informatyki Stosowanej AGH w Krakowie\n\nDane pogodowe pochodzą z serwisu realizowanego w ramach programu \"Małopolska Chmira Edukacyjna\"");
+
+            dialog.show();
             return true;
         }
         return super.onOptionsItemSelected(item);

@@ -7,7 +7,7 @@
     <TableRow>
         <TextView
                 android:layout_column="1"
-                android:text="Godzina pomiaru"
+                android:text="Godzina pomiaru(UTC)"
                 android:padding="3dip"/>
         <TextView
                 android:id="@+id/dialog_time"
