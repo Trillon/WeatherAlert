@@ -55,6 +55,14 @@
                 android:resource="@xml/syncadapter" />
         </service>
 
+        <activity
+                android:name=".activity.OptionsActivity"
+                android:label="@string/title_activity_options"
+                android:parentActivityName=".activity.WeatherAlert">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="pl.pnoga.weatheralert.app.activity.WeatherAlert"/>
+        </activity>
     </application>
 
 </manifest>

@@ -126,7 +126,7 @@ public class WeatherAlert extends Activity {
             return true;
         }
         if (id == R.id.options_settings) {
-
+            startActivity(new Intent(this, OptionsActivity.class));
             return true;
         }
         if (id == R.id.info_settings) {
