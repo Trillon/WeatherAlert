@@ -59,6 +59,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
         db.execSQL(CREATE_MEASURMENTS_TABLE);
         db.execSQL(CREATE_THREATS_TABLE);
         db.execSQL(CREATE_OPTIONS_TABLE);
+        db.execSQL(INSERT_DEFAULT_OPTIONS);
     }
 
     @Override

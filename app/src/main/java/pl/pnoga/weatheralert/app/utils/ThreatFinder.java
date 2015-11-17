@@ -64,12 +64,12 @@ public class ThreatFinder {
         double myLatitude = location.getLatitude(), myLongitude = location.getLongitude();
         if (close) {
             for (Station station : stations) {
-                if (Haversine.haversine(myLatitude, myLongitude, station.getLati(), station.getLongi()) < MAX_CLOSE_RADIUS)
+                if (Haversine.getHaversineValue(myLatitude, myLongitude, station.getLati(), station.getLongi()) < MAX_CLOSE_RADIUS)
                     stationNames.add(station.getStation());
             }
         } else {
             for (Station station : stations) {
-                double distance = Haversine.haversine(myLatitude, myLongitude, station.getLati(), station.getLongi());
+                double distance = Haversine.getHaversineValue(myLatitude, myLongitude, station.getLati(), station.getLongi());
                 if ((distance < MAX_RADIUS) && (distance >= MAX_CLOSE_RADIUS))
                     stationNames.add(station.getStation());
             }
@@ -83,7 +83,7 @@ public class ThreatFinder {
         List<String> stationNames = new ArrayList<>();
         double myLatitude = location.getLatitude(), myLongitude = location.getLongitude();
         for (Station station : stations) {
-            if (Haversine.haversine(myLatitude, myLongitude, station.getLati(), station.getLongi()) < MAX_RADIUS)
+            if (Haversine.getHaversineValue(myLatitude, myLongitude, station.getLati(), station.getLongi()) < MAX_RADIUS)
                 stationNames.add(station.getStation());
         }
 

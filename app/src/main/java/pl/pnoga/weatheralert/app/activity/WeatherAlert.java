@@ -75,62 +75,9 @@ public class WeatherAlert extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather_alert);
-        mAccount = CreateSyncAccount(this);
-        ContentResolver.setSyncAutomatically(mAccount, AUTHORITY, true);
-        ContentResolver.setIsSyncable(mAccount, AUTHORITY, 1);
-        ContentResolver.addPeriodicSync(mAccount, AUTHORITY, Bundle.EMPTY, SYNC_INTERVAL);
-        stationDAO = new StationDAO(this);
-        measurementDAO = new MeasurementDAO(this);
-        threatDAO = new ThreatDAO(this);
-        stationDAO.open();
-        measurementDAO.open();
-        threatDAO.open();
-        locationService = new LocationService(this);
-        Location location = locationService.getLocation();
-        userCoordinates = (TextView) findViewById(R.id.txt_user_coordinates);
-        stationCount = (TextView) findViewById(R.id.txt_station_count);
-        String s = "Obecna lokacja:\n" + locationStringFromLocation(location);
-        SpannableString ss1 = new SpannableString(s);
-        ss1.setSpan(new RelativeSizeSpan(1f), 16, s.length(), 0);
-        userCoordinates.setText(ss1);
-        ListView threats = (ListView) findViewById(R.id.lv_threats);
-        threatsAdapter = new ThreatsAdapter(this, threatDAO.getAllThreats());
-        threats.setAdapter(threatsAdapter);
-        updateView();
-        threats.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                WeatherMeasurement weatherMeasurement = measurementDAO.getMeasurmentsForStation(threatsAdapter.getItem(position).getStation().getStation());
-                final Dialog dialog = new Dialog(WeatherAlert.this);
-                if (weatherMeasurement != null) {
-                    dialog.setContentView(R.layout.details_dialog);
-                    dialog.setTitle("Ostatni pomiar");
-                    TextView time = (TextView) dialog.findViewById(R.id.dialog_time);
-                    TextView temperature = (TextView) dialog.findViewById(R.id.dialog_temperature);
-                    TextView pressure = (TextView) dialog.findViewById(R.id.dialog_pressure);
-                    TextView moisture = (TextView) dialog.findViewById(R.id.dialog_moisture);
-                    TextView shower = (TextView) dialog.findViewById(R.id.dialog_shower);
-                    TextView wind_speed = (TextView) dialog.findViewById(R.id.dialog_wind_speed);
-                    time.setText(weatherMeasurement.getTime());
-                    temperature.setText(weatherMeasurement.getData().getTemperature() + " °C");
-                    pressure.setText(weatherMeasurement.getData().getPressure() + " hPa");
-                    moisture.setText(weatherMeasurement.getData().getMoisture() + " %");
-                    shower.setText(weatherMeasurement.getData().getShowers() + " mm");
-                    wind_speed.setText(weatherMeasurement.getData().getWindSpeed() + " m/s");
-                    Button dialogButton = (Button) dialog.findViewById(R.id.dialog_button);
-                    dialogButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            dialog.dismiss();
-                        }
-                    });
-                } else {
-                    dialog.setTitle("Brak pomiarów dla stacji");
-                }
-                dialog.show();
-            }
-        });
-        progressDialog = new ProgressDialog(this);
+        createUserAndStartUpdates();
+        openDatabaseConnections();
+        getLocationAndUpdateView();
     }
 
     @Override
@@ -145,9 +92,7 @@ public class WeatherAlert extends Activity {
 
     @Override
     protected void onResume() {
-        stationDAO.open();
-        measurementDAO.open();
-        threatDAO.open();
+        openDatabaseConnections();
         super.onResume();
         registerReceiver(syncBroadcastReceiver, syncIntentFilter);
     }
@@ -155,9 +100,7 @@ public class WeatherAlert extends Activity {
     @Override
     protected void onPause() {
         unregisterReceiver(syncBroadcastReceiver);
-        stationDAO.close();
-        measurementDAO.close();
-        threatDAO.close();
+        closeDatabaseConnections();
         super.onPause();
     }
 
@@ -195,12 +138,82 @@ public class WeatherAlert extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-
     private void updateView() {
         threatsAdapter.clear();
         threatsAdapter.addAll(threatDAO.getAllThreats());
         threatsAdapter.sort(new ThreatComparator());
         threatsAdapter.notifyDataSetChanged();
         stationCount.setText("Ilość stacji w zasiegu: " + ThreatFinder.getAllStationInRadius(stationDAO.getStations(), locationService.getLocation()).size());
+    }
+
+    private void openDatabaseConnections() {
+        stationDAO = new StationDAO(this);
+        measurementDAO = new MeasurementDAO(this);
+        threatDAO = new ThreatDAO(this);
+        stationDAO.open();
+        measurementDAO.open();
+        threatDAO.open();
+    }
+
+    private void closeDatabaseConnections() {
+        stationDAO.close();
+        measurementDAO.close();
+        threatDAO.close();
+    }
+
+    private void createUserAndStartUpdates() {
+        mAccount = CreateSyncAccount(this);
+        ContentResolver.setSyncAutomatically(mAccount, AUTHORITY, true);
+        ContentResolver.setIsSyncable(mAccount, AUTHORITY, 1);
+        ContentResolver.addPeriodicSync(mAccount, AUTHORITY, Bundle.EMPTY, SYNC_INTERVAL);
+    }
+
+    private void getLocationAndUpdateView() {
+        locationService = new LocationService(this);
+        Location location = locationService.getLocation();
+        userCoordinates = (TextView) findViewById(R.id.txt_user_coordinates);
+        stationCount = (TextView) findViewById(R.id.txt_station_count);
+        String s = "Obecna lokacja:\n" + locationStringFromLocation(location);
+        SpannableString ss1 = new SpannableString(s);
+        ss1.setSpan(new RelativeSizeSpan(1f), 16, s.length(), 0);
+        userCoordinates.setText(ss1);
+        ListView threats = (ListView) findViewById(R.id.lv_threats);
+        threatsAdapter = new ThreatsAdapter(this, threatDAO.getAllThreats());
+        threats.setAdapter(threatsAdapter);
+        threats.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                WeatherMeasurement weatherMeasurement = measurementDAO.getMeasurmentsForStation(threatsAdapter.getItem(position).getStation().getStation());
+                final Dialog dialog = new Dialog(WeatherAlert.this);
+                if (weatherMeasurement != null) {
+                    dialog.setContentView(R.layout.details_dialog);
+                    dialog.setTitle("Ostatni pomiar");
+                    TextView time = (TextView) dialog.findViewById(R.id.dialog_time);
+                    TextView temperature = (TextView) dialog.findViewById(R.id.dialog_temperature);
+                    TextView pressure = (TextView) dialog.findViewById(R.id.dialog_pressure);
+                    TextView moisture = (TextView) dialog.findViewById(R.id.dialog_moisture);
+                    TextView shower = (TextView) dialog.findViewById(R.id.dialog_shower);
+                    TextView wind_speed = (TextView) dialog.findViewById(R.id.dialog_wind_speed);
+                    time.setText(weatherMeasurement.getTime());
+                    temperature.setText(weatherMeasurement.getData().getTemperature() + " °C");
+                    pressure.setText(weatherMeasurement.getData().getPressure() + " hPa");
+                    moisture.setText(weatherMeasurement.getData().getMoisture() + " %");
+                    shower.setText(weatherMeasurement.getData().getShowers() + " mm");
+                    wind_speed.setText(weatherMeasurement.getData().getWindSpeed() + " m/s");
+                    Button dialogButton = (Button) dialog.findViewById(R.id.dialog_button);
+                    dialogButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            dialog.dismiss();
+                        }
+                    });
+                } else {
+                    dialog.setTitle("Brak pomiarów dla stacji");
+                }
+                dialog.show();
+            }
+        });
+        progressDialog = new ProgressDialog(this);
+        updateView();
     }
 }
