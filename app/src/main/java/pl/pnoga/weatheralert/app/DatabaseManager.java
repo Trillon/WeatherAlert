@@ -36,7 +36,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
             "FOREIGN KEY(station) REFERENCES stations(station));";
     private final String CREATE_OPTIONS_TABLE = "CREATE TABLE options(" +
             "name text," +
-            "value text," +
+            "value double," +
             "UNIQUE (name) ON CONFLICT IGNORE)";
     private final String INSERT_DEFAULT_OPTIONS ="INSERT INTO options VALUES (\"CRIT_MAX_TEMPERATURE\", \"30.0\");" +
             "INSERT INTO options VALUES (\"CRIT_MIN_TEMPERATURE\", \"-15.0\");" +

@@ -1,6 +1,8 @@
 package pl.pnoga.weatheralert.app.utils;
 
+import android.content.Context;
 import android.location.Location;
+import pl.pnoga.weatheralert.app.dao.OptionsDAO;
 import pl.pnoga.weatheralert.app.model.*;
 
 import java.text.ParseException;
@@ -10,14 +12,8 @@ import java.util.Date;
 import java.util.List;
 
 public class ThreatFinder {
-    private static final double CRIT_MAX_TEMPERATURE = 30.0;
-    private static final double CRIT_MIN_TEMPERATURE = -15.0;
-    private static final double CRIT_WIND_SPEED = 20.0;
-    private static final double CRIT_SHOWER = 30.0;
-    private static final double MAX_RADIUS = 20.0;
-    private static final double MAX_CLOSE_RADIUS = 10.0;
 
-    public static ThreatList getThreatsForStation(WeatherMeasurementList weatherMeasurements, Station station, boolean close) {
+    public static ThreatList getThreatsForStation(WeatherMeasurementList weatherMeasurements, Station station, boolean close, Context context) {
         ThreatList threats = new ThreatList();
         if (weatherMeasurements.isEmpty()) {
             Threat threat = new Threat();
@@ -27,10 +23,10 @@ public class ThreatFinder {
             threat.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
             threats.add(threat);
         } else {
-        threats.addAll(getWindThreat(weatherMeasurements, station, close));
-        threats.addAll(getShowerThreat(weatherMeasurements, station, close));
+            threats.addAll(getWindThreat(weatherMeasurements, station, close, context));
+            threats.addAll(getShowerThreat(weatherMeasurements, station, close, context));
         threats.addAll(getStormThreat(weatherMeasurements, station, close));
-        threats.addAll(getTemparatureThreat(weatherMeasurements, station, close));
+            threats.addAll(getTemparatureThreat(weatherMeasurements, station, close, context));
         if (threats.size() == 0) {
             Threat threat = new Threat();
             threat.setCode(Constants.CODE_GREEN);
@@ -59,45 +55,55 @@ public class ThreatFinder {
         return returnDate;
     }
 
-    public static List<String> getStationsInRadius(StationList stations, Location location, boolean close) {
+    public static List<String> getStationsInRadius(StationList stations, Location location, boolean close, Context context) {
         List<String> stationNames = new ArrayList<>();
+        OptionsDAO optionsDAO = new OptionsDAO(context);
+        optionsDAO.open();
+        double maxRadius = optionsDAO.getMaxRadius();
+        double closeRadius = optionsDAO.getCloseRadius();
+        optionsDAO.close();
         double myLatitude = location.getLatitude(), myLongitude = location.getLongitude();
         if (close) {
             for (Station station : stations) {
-                if (Haversine.getHaversineValue(myLatitude, myLongitude, station.getLati(), station.getLongi()) < MAX_CLOSE_RADIUS)
+                if (Haversine.getHaversineValue(myLatitude, myLongitude, station.getLati(), station.getLongi()) < closeRadius)
                     stationNames.add(station.getStation());
             }
         } else {
             for (Station station : stations) {
                 double distance = Haversine.getHaversineValue(myLatitude, myLongitude, station.getLati(), station.getLongi());
-                if ((distance < MAX_RADIUS) && (distance >= MAX_CLOSE_RADIUS))
+                if ((distance < maxRadius) && (distance >= closeRadius))
                     stationNames.add(station.getStation());
             }
         }
-
         return stationNames;
 
     }
 
-    public static List<String> getAllStationInRadius(StationList stations, Location location) {
+    public static List<String> getAllStationInRadius(StationList stations, Location location, Context context) {
         List<String> stationNames = new ArrayList<>();
+        OptionsDAO optionsDAO = new OptionsDAO(context);
+        optionsDAO.open();
+        double maxRadius = optionsDAO.getMaxRadius();
+        optionsDAO.close();
         double myLatitude = location.getLatitude(), myLongitude = location.getLongitude();
         for (Station station : stations) {
-            if (Haversine.getHaversineValue(myLatitude, myLongitude, station.getLati(), station.getLongi()) < MAX_RADIUS)
+            if (Haversine.getHaversineValue(myLatitude, myLongitude, station.getLati(), station.getLongi()) < maxRadius)
                 stationNames.add(station.getStation());
         }
-
         return stationNames;
 
     }
 
-    private static ThreatList getWindThreat(WeatherMeasurementList weatherMeasurements, Station station, boolean close) {
+    private static ThreatList getWindThreat(WeatherMeasurementList weatherMeasurements, Station station, boolean close, Context context) {
         ThreatList threats = new ThreatList();
         Threat threat = new Threat();
         double maxWindSpeed = 0.0;
-
+        OptionsDAO optionsDAO = new OptionsDAO(context);
+        optionsDAO.open();
+        double critWindSpeed = optionsDAO.getCritWindSpeed();
+        optionsDAO.close();
         for (WeatherMeasurement weatherMeasurement : weatherMeasurements) {
-            if (weatherMeasurement.getData().getWindSpeed() > CRIT_WIND_SPEED) {
+            if (weatherMeasurement.getData().getWindSpeed() > critWindSpeed) {
                 maxWindSpeed = weatherMeasurement.getData().getWindSpeed();
                 threat.setCode(close ? Constants.CODE_RED : Constants.CODE_YELLOW);
                 threat.setTime(weatherMeasurement.getTime());
@@ -105,18 +111,21 @@ public class ThreatFinder {
                 threat.setStation(station);
             }
         }
-        if (maxWindSpeed > CRIT_WIND_SPEED)
+        if (maxWindSpeed > critWindSpeed)
             threats.add(threat);
         return threats;
     }
 
-    private static ThreatList getShowerThreat(WeatherMeasurementList weatherMeasurements, Station station, boolean close) {
+    private static ThreatList getShowerThreat(WeatherMeasurementList weatherMeasurements, Station station, boolean close, Context context) {
         ThreatList threats = new ThreatList();
         Threat threat = new Threat();
         double shower = 0.0;
-
+        OptionsDAO optionsDAO = new OptionsDAO(context);
+        optionsDAO.open();
+        double critShower = optionsDAO.getCritShower();
+        optionsDAO.close();
         for (WeatherMeasurement weatherMeasurement : weatherMeasurements) {
-            if (weatherMeasurement.getData().getLastHourDrop() > CRIT_SHOWER) {
+            if (weatherMeasurement.getData().getLastHourDrop() > critShower) {
                 shower = weatherMeasurement.getData().getLastHourDrop();
                 threat.setCode(close ? Constants.CODE_RED : Constants.CODE_YELLOW);
                 threat.setTime(weatherMeasurement.getTime());
@@ -124,7 +133,7 @@ public class ThreatFinder {
                 threat.setStation(station);
             }
         }
-        if (shower > CRIT_SHOWER)
+        if (shower > critShower)
             threats.add(threat);
         return threats;
     }
@@ -134,12 +143,17 @@ public class ThreatFinder {
         return threats;
     }
 
-    private static ThreatList getTemparatureThreat(WeatherMeasurementList weatherMeasurements, Station station, boolean close) {
+    private static ThreatList getTemparatureThreat(WeatherMeasurementList weatherMeasurements, Station station, boolean close, Context context) {
         ThreatList threats = new ThreatList();
         double minTemp = 0.0, maxTemp = 0.0;
+        OptionsDAO optionsDAO = new OptionsDAO(context);
+        optionsDAO.open();
+        double critMinTemperature = optionsDAO.getMinCritTemperature();
+        double critMaxTemperature = optionsDAO.getMaxCritTemperature();
+        optionsDAO.close();
         Threat threatMin = new Threat();
         for (WeatherMeasurement weatherMeasurement : weatherMeasurements) {
-            if (weatherMeasurement.getData().getTemperature() < CRIT_MIN_TEMPERATURE) {
+            if (weatherMeasurement.getData().getTemperature() < critMinTemperature) {
                 minTemp = weatherMeasurement.getData().getTemperature();
                 threatMin.setCode(close ? Constants.CODE_RED : Constants.CODE_YELLOW);
                 threatMin.setTime(weatherMeasurement.getTime());
@@ -147,12 +161,12 @@ public class ThreatFinder {
                 threatMin.setStation(station);
             }
         }
-        if (minTemp < CRIT_MIN_TEMPERATURE)
+        if (minTemp < critMinTemperature)
             threats.add(threatMin);
 
         Threat threatMax = new Threat();
         for (WeatherMeasurement weatherMeasurement : weatherMeasurements) {
-            if (weatherMeasurement.getData().getTemperature() > CRIT_MAX_TEMPERATURE) {
+            if (weatherMeasurement.getData().getTemperature() > critMaxTemperature) {
                 maxTemp = weatherMeasurement.getData().getTemperature();
                 threatMax.setCode(close ? Constants.CODE_RED : Constants.CODE_YELLOW);
                 threatMax.setTime(weatherMeasurement.getTime());
@@ -160,7 +174,7 @@ public class ThreatFinder {
                 threatMax.setStation(station);
             }
         }
-        if (maxTemp > CRIT_MAX_TEMPERATURE)
+        if (maxTemp > critMaxTemperature)
             threats.add(threatMax);
         return threats;
     }

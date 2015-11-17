@@ -58,7 +58,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         measurementDAO.open();
         stationDAO.open();
         stationDAO.saveStations(serverDataProvider.getStations());
-        for (String stationName : ThreatFinder.getAllStationInRadius(stationDAO.getStations(), location)) {
+            for (String stationName : ThreatFinder.getAllStationInRadius(stationDAO.getStations(), location, getContext())) {
             measurementDAO.saveMeasurements(serverDataProvider.getWeatherMeasurements(stationName));
         }
         createThreatDataAndSaveToDB();
@@ -82,11 +82,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         c.setTimeInMillis(System.currentTimeMillis());
         c.add(Calendar.HOUR_OF_DAY, -6);
         ThreatList threats = new ThreatList();
-        for (String stationName : ThreatFinder.getStationsInRadius(stationDAO.getStations(), location, true)) {
-            threats.addAll(ThreatFinder.getThreatsForStation(measurementDAO.getMeasurmentsAfterDateForStation(c.getTime(), stationName), stationDAO.getStationById(stationName), true));
+        for (String stationName : ThreatFinder.getStationsInRadius(stationDAO.getStations(), location, true, getContext())) {
+            threats.addAll(ThreatFinder.getThreatsForStation(measurementDAO.getMeasurmentsAfterDateForStation(c.getTime(), stationName), stationDAO.getStationById(stationName), true, getContext()));
         }
-        for (String stationName : ThreatFinder.getStationsInRadius(stationDAO.getStations(), location, false)) {
-            threats.addAll(ThreatFinder.getThreatsForStation(measurementDAO.getMeasurmentsAfterDateForStation(c.getTime(), stationName), stationDAO.getStationById(stationName), false));
+        for (String stationName : ThreatFinder.getStationsInRadius(stationDAO.getStations(), location, false, getContext())) {
+            threats.addAll(ThreatFinder.getThreatsForStation(measurementDAO.getMeasurmentsAfterDateForStation(c.getTime(), stationName), stationDAO.getStationById(stationName), false, getContext()));
         }
         int alarmCount = 0, warningCount = 0;
         for (Threat threat : threats) {

@@ -5,6 +5,10 @@
           android:title="@string/sync_settings"
           android:orderInCategory="100"
           android:showAsAction="never"/>
+    <item android:id="@+id/options_settings"
+          android:title="@string/options_settings"
+          android:orderInCategory="100"
+          android:showAsAction="never"/>
     <item android:id="@+id/info_settings"
           android:title="@string/info_settings"
           android:orderInCategory="100"

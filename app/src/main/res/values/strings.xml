@@ -6,4 +6,7 @@
     <string name="sync_settings">Synchronizuj</string>
     <string name="txt_message">KOMUNIKATY</string>
     <string name="info_settings">O aplikacji</string>
+    <string name="options_settings">Opcje</string>
+    <string name="about">"Aplikacja została stworzona w ramach pracy inżynierskiej realizowanej na Wydziale Fizyki i Informatyki Stosowanej AGH w Krakowie
+        \n\nDane pogodowe pochodzą z serwisu realizowanego w ramach programu \"Małopolska Chmura Edukacyjna\""</string>
 </resources>

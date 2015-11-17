@@ -125,13 +125,16 @@ public class WeatherAlert extends Activity {
             ContentResolver.requestSync(mAccount, AUTHORITY, settingsBundle);
             return true;
         }
+        if (id == R.id.options_settings) {
+
+            return true;
+        }
         if (id == R.id.info_settings) {
             final Dialog dialog = new Dialog(WeatherAlert.this);
             dialog.setContentView(R.layout.about_dialog);
             dialog.setTitle("O aplikacji");
             TextView about = (TextView) dialog.findViewById(R.id.txt_about);
-            about.setText("Aplikacja została stworzona w ramach pracy inżynierskiej realizowanej na Wydziale Fizyki i Informatyki Stosowanej AGH w Krakowie\n\nDane pogodowe pochodzą z serwisu realizowanego w ramach programu \"Małopolska Chmura Edukacyjna\"");
-
+            about.setText(R.string.about);
             dialog.show();
             return true;
         }
@@ -143,7 +146,7 @@ public class WeatherAlert extends Activity {
         threatsAdapter.addAll(threatDAO.getAllThreats());
         threatsAdapter.sort(new ThreatComparator());
         threatsAdapter.notifyDataSetChanged();
-        stationCount.setText("Ilość stacji w zasiegu: " + ThreatFinder.getAllStationInRadius(stationDAO.getStations(), locationService.getLocation()).size());
+        stationCount.setText("Ilość stacji w zasiegu: " + ThreatFinder.getAllStationInRadius(stationDAO.getStations(), locationService.getLocation(), this).size());
     }
 
     private void openDatabaseConnections() {
