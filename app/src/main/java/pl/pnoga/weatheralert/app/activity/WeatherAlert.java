@@ -219,4 +219,5 @@ public class WeatherAlert extends Activity {
         progressDialog = new ProgressDialog(this);
         updateView();
     }
+
 }
