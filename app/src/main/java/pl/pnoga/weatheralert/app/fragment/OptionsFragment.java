@@ -3,6 +3,8 @@ package pl.pnoga.weatheralert.app.fragment;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
+import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import pl.pnoga.weatheralert.app.R;
@@ -31,20 +33,41 @@ public class OptionsFragment extends PreferenceFragment {
         setChangeListenersForPreferences();
     }
 
+    @Override
+    public void onDestroy() {
+        optionsDAO.close();
+        super.onDestroy();
+    }
+
     private void openDatabaseConnection() {
         optionsDAO = new OptionsDAO(getActivity());
         optionsDAO.open();
     }
 
     private void setDefaultOptions() {
-        getPreferenceScreen().findPreference("pref_max_temp").setDefaultValue(optionsDAO.getMaxCritTemperature());
-        getPreferenceScreen().findPreference("pref_min_temp").setDefaultValue(optionsDAO.getMinCritTemperature());
-        getPreferenceScreen().findPreference("pref_wind_speed").setDefaultValue(optionsDAO.getCritWindSpeed());
-        getPreferenceScreen().findPreference("pref_shower").setDefaultValue(optionsDAO.getCritShower());
-        getPreferenceScreen().findPreference("pref_max_radius").setDefaultValue(optionsDAO.getMaxRadius());
-        getPreferenceScreen().findPreference("pref_close_radius").setDefaultValue(optionsDAO.getCloseRadius());
-        getPreferenceScreen().findPreference("pref_interval").setDefaultValue(optionsDAO.getRefreshInterval());
-        getPreferenceScreen().findPreference("pref_show_empty").setDefaultValue(optionsDAO.getShowEmptyThreats() != 0);
+        EditTextPreference maxTempPreference = (EditTextPreference) getPreferenceScreen().findPreference("pref_max_temp");
+        maxTempPreference.setText(String.valueOf(optionsDAO.getMaxCritTemperature()));
+
+        EditTextPreference minTempPreference = (EditTextPreference) getPreferenceScreen().findPreference("pref_min_temp");
+        minTempPreference.setText(String.valueOf(optionsDAO.getMinCritTemperature()));
+
+        EditTextPreference windSpeedPreference = (EditTextPreference) getPreferenceScreen().findPreference("pref_wind_speed");
+        windSpeedPreference.setText(String.valueOf(optionsDAO.getCritWindSpeed()));
+
+        EditTextPreference showerPreference = (EditTextPreference) getPreferenceScreen().findPreference("pref_shower");
+        showerPreference.setText(String.valueOf(optionsDAO.getCritShower()));
+
+        EditTextPreference maxRadiusPreference = (EditTextPreference) getPreferenceScreen().findPreference("pref_max_radius");
+        maxRadiusPreference.setText(String.valueOf(optionsDAO.getMaxRadius()));
+
+        EditTextPreference closeRadiusPreference = (EditTextPreference) getPreferenceScreen().findPreference("pref_close_radius");
+        closeRadiusPreference.setText(String.valueOf(optionsDAO.getCloseRadius()));
+
+        EditTextPreference intervalPreference = (EditTextPreference) getPreferenceScreen().findPreference("pref_interval");
+        intervalPreference.setText(String.valueOf(optionsDAO.getRefreshInterval() / 60));
+
+        CheckBoxPreference shoeEwmpyThreatsPreference = (CheckBoxPreference) getPreferenceScreen().findPreference("pref_show_empty");
+        shoeEwmpyThreatsPreference.setChecked(optionsDAO.getShowEmptyThreats() != 0);
     }
 
     private void setChangeListenersForPreferences() {
