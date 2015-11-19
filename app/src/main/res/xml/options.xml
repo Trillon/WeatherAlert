@@ -34,4 +34,7 @@
                 android:title="Częstość(min)"
                 android:inputType="numberDecimal"/>
     </PreferenceCategory>
+    <CheckBoxPreference
+            android:key="pref_show_empty"
+            android:title="Pokazuj stacje bez pomiarów?"/>
 </PreferenceScreen>

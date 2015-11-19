@@ -6,6 +6,7 @@ public class Threat {
     private String message;
     private Station station;
     private String time;
+    private int isEmpty;
 
     public int getCode() {
         return code;
@@ -37,5 +38,13 @@ public class Threat {
 
     public void setTime(String time) {
         this.time = time;
+    }
+
+    public int getIsEmpty() {
+        return isEmpty;
+    }
+
+    public void setIsEmpty(int isEmpty) {
+        this.isEmpty = isEmpty;
     }
 }

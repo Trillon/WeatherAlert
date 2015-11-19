@@ -24,6 +24,7 @@ public class ThreatDAO extends TableDAO {
             values.put("message", threat.getMessage());
             values.put("time", threat.getTime());
             values.put("station", threat.getStation().getStation());
+            values.put("is_empty", threat.getIsEmpty());
             if (database.insert(TABLE_NAME, null, values) == -1)
                 Log.d(TAG, "Failed insert of threat: " + threat.getTime());
             else ++counter;
@@ -32,11 +33,12 @@ public class ThreatDAO extends TableDAO {
     }
 
     public ThreatList getAllThreats() {
+        Log.d(TAG, "getAllThreats");
         ThreatList threats = new ThreatList();
         StationDAO stationDAO = new StationDAO(context);
         stationDAO.open();
         Cursor cursor = database.query(TABLE_NAME,
-                new String[]{"code", "message", "time", "station"}, null, null, null, null, null);
+                new String[]{"code", "message", "time", "station", "is_empty"}, null, null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             Threat threat = new Threat();
@@ -44,6 +46,30 @@ public class ThreatDAO extends TableDAO {
             threat.setMessage(cursor.getString(1));
             threat.setTime(cursor.getString(2));
             threat.setStation(stationDAO.getStationById(cursor.getString(3)));
+            threat.setIsEmpty(cursor.getInt(4));
+            threats.add(threat);
+            cursor.moveToNext();
+        }
+        cursor.close();
+        stationDAO.close();
+        return threats;
+    }
+
+    public ThreatList getNonEmptyThreats() {
+        Log.d(TAG, "getNonEmptyThreats");
+        ThreatList threats = new ThreatList();
+        StationDAO stationDAO = new StationDAO(context);
+        stationDAO.open();
+        Cursor cursor = database.query(TABLE_NAME,
+                new String[]{"code", "message", "time", "station", "is_empty"}, "is_empty=0", null, null, null, null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            Threat threat = new Threat();
+            threat.setCode(cursor.getInt(0));
+            threat.setMessage(cursor.getString(1));
+            threat.setTime(cursor.getString(2));
+            threat.setStation(stationDAO.getStationById(cursor.getString(3)));
+            threat.setIsEmpty(cursor.getInt(4));
             threats.add(threat);
             cursor.moveToNext();
         }

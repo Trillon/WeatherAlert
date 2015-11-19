@@ -15,4 +15,7 @@ public class Constants {
     public static final String ACCOUNT_TYPE = "pnoga.pl";
     public static final String ACCOUNT = "WeatherAlert";
     public static final String ACTION_FINISHED_SYNC = "pl.pnoga.weatheralert.app.activity.ACTION_FINISHED_SYNC";
+    public static final int EMPTY_THREAT = 1;
+    public static final int NON_EMPTY_THREAT = 0;
+    public static final int SHOW_EMPTY_THREAT = 1;
 }

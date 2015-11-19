@@ -44,6 +44,7 @@ public class OptionsFragment extends PreferenceFragment {
         getPreferenceScreen().findPreference("pref_max_radius").setDefaultValue(optionsDAO.getMaxRadius());
         getPreferenceScreen().findPreference("pref_close_radius").setDefaultValue(optionsDAO.getCloseRadius());
         getPreferenceScreen().findPreference("pref_interval").setDefaultValue(optionsDAO.getRefreshInterval());
+        getPreferenceScreen().findPreference("pref_show_empty").setDefaultValue(true);
     }
 
     private void setChangeListenersForPreferences() {
@@ -165,6 +166,13 @@ public class OptionsFragment extends PreferenceFragment {
                     ContentResolver.addPeriodicSync(WeatherAlert.CreateSyncAccount(getActivity()), AUTHORITY, Bundle.EMPTY, Long.valueOf((String) newValue) * 60);
                 }
                 return returnValue;
+            }
+        });
+        getPreferenceScreen().findPreference("pref_show_empty").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                optionsDAO.saveShowEmptyThreats((boolean) newValue);
+                return true;
             }
         });
     }

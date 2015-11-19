@@ -91,6 +91,7 @@ public class WeatherAlert extends Activity {
     @Override
     protected void onResume() {
         openDatabaseConnections();
+        updateView();
         super.onResume();
         registerReceiver(syncBroadcastReceiver, syncIntentFilter);
     }
@@ -141,7 +142,9 @@ public class WeatherAlert extends Activity {
 
     private void updateView() {
         threatsAdapter.clear();
-        threatsAdapter.addAll(threatDAO.getAllThreats());
+        if (optionsDAO.getShowEmptyThreats() == 1)
+            threatsAdapter.addAll(threatDAO.getAllThreats());
+        else threatsAdapter.addAll(threatDAO.getNonEmptyThreats());
         threatsAdapter.sort(new ThreatComparator());
         threatsAdapter.notifyDataSetChanged();
         stationCount.setText("Ilość stacji w zasiegu: " + ThreatFinder.getAllStationInRadius(stationDAO.getStations(), locationService.getLocation(), this).size());

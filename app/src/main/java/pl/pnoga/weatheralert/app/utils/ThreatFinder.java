@@ -21,11 +21,12 @@ public class ThreatFinder {
             threat.setMessage("Nie znaleziono aktualnych pomiarów dla stacji:");
             threat.setStation(station);
             threat.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+            threat.setIsEmpty(Constants.EMPTY_THREAT);
             threats.add(threat);
         } else {
             threats.addAll(getWindThreat(weatherMeasurements, station, close, context));
             threats.addAll(getShowerThreat(weatherMeasurements, station, close, context));
-        threats.addAll(getStormThreat(weatherMeasurements, station, close));
+            threats.addAll(getStormThreat(weatherMeasurements, station, close));
             threats.addAll(getTemparatureThreat(weatherMeasurements, station, close, context));
         if (threats.size() == 0) {
             Threat threat = new Threat();
@@ -33,6 +34,7 @@ public class ThreatFinder {
             threat.setMessage("Brak zagrożeń ze stacji:");
             threat.setStation(station);
             threat.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(getLatestDate(weatherMeasurements)));
+            threat.setIsEmpty(Constants.NON_EMPTY_THREAT);
             threats.add(threat);
         }
         }

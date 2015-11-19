@@ -16,6 +16,7 @@ public class OptionsDAO extends TableDAO {
     private final String MAX_RADIUS = "MAX_RADIUS";
     private final String MAX_CLOSE_RADIUS = "MAX_CLOSE_RADIUS";
     private final String REFRESH_INTERVAL = "REFRESH_INTERVAL";
+    private final String SHOW_EMPTY_THREATS = "SHOW_EMPTY_THREATS";
 
 
     public OptionsDAO(Context context) {
@@ -106,10 +107,22 @@ public class OptionsDAO extends TableDAO {
         return refreshInterval;
     }
 
+    public double getShowEmptyThreats() {
+        double refreshInterval = Constants.SHOW_EMPTY_THREAT;
+        Cursor cursor = database.query(TABLE_NAME,
+                new String[]{"value"}, "name = \"" + SHOW_EMPTY_THREATS + "\"", null, null, null, null);
+        if (cursor.moveToFirst()) {
+            refreshInterval = cursor.getDouble(0);
+        }
+        cursor.close();
+        Log.d(TAG, SHOW_EMPTY_THREATS + " " + refreshInterval);
+        return refreshInterval;
+    }
+
     public void saveMaxCritTemperature(double maxTemperatureValue) {
         ContentValues values = new ContentValues();
         values.put("value", maxTemperatureValue);
-        if (database.update(TABLE_NAME, values, "name = \"" + CRIT_MAX_TEMPERATURE+"\"", null) == -1)
+        if (database.update(TABLE_NAME, values, "name = \"" + CRIT_MAX_TEMPERATURE + "\"", null) == 0)
             Log.d(TAG, "Failed insert of value " + CRIT_MAX_TEMPERATURE);
         else Log.d(TAG, "Saved " + CRIT_MAX_TEMPERATURE);
     }
@@ -117,7 +130,7 @@ public class OptionsDAO extends TableDAO {
     public void saveMinCritTemperature(double minTemperatureValue) {
         ContentValues values = new ContentValues();
         values.put("value", minTemperatureValue);
-        if (database.update(TABLE_NAME, values, "name = \"" + CRIT_MIN_TEMPERATURE+"\"", null) == -1)
+        if (database.update(TABLE_NAME, values, "name = \"" + CRIT_MIN_TEMPERATURE + "\"", null) == 0)
             Log.d(TAG, "Failed insert of value " + CRIT_MIN_TEMPERATURE);
         else Log.d(TAG, "Saved " + CRIT_MIN_TEMPERATURE);
     }
@@ -125,7 +138,7 @@ public class OptionsDAO extends TableDAO {
     public void saveCritWindSpeed(double windSpeed) {
         ContentValues values = new ContentValues();
         values.put("value", windSpeed);
-        if (database.update(TABLE_NAME, values, "name = \"" + CRIT_WIND_SPEED+"\"", null) == -1)
+        if (database.update(TABLE_NAME, values, "name = \"" + CRIT_WIND_SPEED + "\"", null) == 0)
             Log.d(TAG, "Failed insert of value " + CRIT_WIND_SPEED);
         else Log.d(TAG, "Saved " + CRIT_WIND_SPEED);
     }
@@ -133,7 +146,7 @@ public class OptionsDAO extends TableDAO {
     public void saveCritShower(double shower) {
         ContentValues values = new ContentValues();
         values.put("value", shower);
-        if (database.update(TABLE_NAME, values, "name = \"" + CRIT_SHOWER+"\"", null) == -1)
+        if (database.update(TABLE_NAME, values, "name = \"" + CRIT_SHOWER + "\"", null) == 0)
             Log.d(TAG, "Failed insert of value " + CRIT_SHOWER);
         else Log.d(TAG, "Saved " + CRIT_SHOWER);
     }
@@ -141,7 +154,7 @@ public class OptionsDAO extends TableDAO {
     public void saveMaxRadius(double maxRadius) {
         ContentValues values = new ContentValues();
         values.put("value", maxRadius);
-        if (database.update(TABLE_NAME, values, "name = \"" + MAX_RADIUS+"\"", null) == -1)
+        if (database.update(TABLE_NAME, values, "name = \"" + MAX_RADIUS + "\"", null) == 0)
             Log.d(TAG, "Failed insert of value " + MAX_RADIUS);
         else Log.d(TAG, "Saved " + MAX_RADIUS);
     }
@@ -149,7 +162,7 @@ public class OptionsDAO extends TableDAO {
     public void saveCloseRadius(double closeRadius) {
         ContentValues values = new ContentValues();
         values.put("value", closeRadius);
-        if (database.update(TABLE_NAME, values, "name = \"" + MAX_CLOSE_RADIUS+"\"", null) == -1)
+        if (database.update(TABLE_NAME, values, "name = \"" + MAX_CLOSE_RADIUS + "\"", null) == 0)
             Log.d(TAG, "Failed insert of value " + MAX_CLOSE_RADIUS);
         else Log.d(TAG, "Saved " + MAX_CLOSE_RADIUS);
     }
@@ -157,8 +170,16 @@ public class OptionsDAO extends TableDAO {
     public void saveRefreshInterval(double refreshInterval) {
         ContentValues values = new ContentValues();
         values.put("value", refreshInterval);
-        if (database.update(TABLE_NAME, values, "name = \"" + REFRESH_INTERVAL + "\"", null) == -1)
+        if (database.update(TABLE_NAME, values, "name = \"" + REFRESH_INTERVAL + "\"", null) == 0)
             Log.d(TAG, "Failed insert of value " + REFRESH_INTERVAL);
         else Log.d(TAG, "Saved " + REFRESH_INTERVAL);
+    }
+
+    public void saveShowEmptyThreats(boolean showEmptyThreats) {
+        ContentValues values = new ContentValues();
+        values.put("value", showEmptyThreats ? 1.0 : 0.0);
+        if (database.update(TABLE_NAME, values, "name = \"" + SHOW_EMPTY_THREATS + "\"", null) == 0)
+            Log.d(TAG, "Failed insert of value " + SHOW_EMPTY_THREATS);
+        else Log.d(TAG, "Saved " + SHOW_EMPTY_THREATS);
     }
 }

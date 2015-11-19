@@ -33,18 +33,20 @@ public class DatabaseManager extends SQLiteOpenHelper {
             "message text," +
             "time datetime," +
             "station text," +
+            "is_empty integer," +
             "FOREIGN KEY(station) REFERENCES stations(station));";
     private final String CREATE_OPTIONS_TABLE = "CREATE TABLE options(" +
             "name text," +
             "value double," +
             "UNIQUE (name) ON CONFLICT IGNORE)";
-    private final String INSERT_DEFAULT_OPTIONS ="INSERT INTO options(name, value) VALUES (\"CRIT_MAX_TEMPERATURE\", \"30.0\");" +
-            "INSERT INTO options(name, value) VALUES (\"CRIT_MIN_TEMPERATURE\", \"-15.0\");" +
-            "INSERT INTO options(name, value) VALUES (\"CRIT_WIND_SPEED\", \"20.0\");" +
-            "INSERT INTO options(name, value) VALUES (\"CRIT_SHOWER\", \"30.0\");" +
-            "INSERT INTO options(name, value) VALUES (\"MAX_RADIUS\", \"20.0\");" +
-            "INSERT INTO options(name, value) VALUES (\"MAX_CLOSE_RADIUS\", \"10.0\");" +
-            "INSERT INTO options(name, value) VALUES (\"REFRESH_INTERVAL\", \"1800\");";
+    private final String INSERT_DEFAULT_OPTIONS = "INSERT INTO options(name, value) VALUES (\"CRIT_MAX_TEMPERATURE\", \"30.0\"), " +
+            "(\"CRIT_MIN_TEMPERATURE\", \"-15.0\"), " +
+            "(\"CRIT_WIND_SPEED\", \"20.0\"), " +
+            "(\"CRIT_SHOWER\", \"30.0\"), " +
+            "(\"MAX_RADIUS\", \"20.0\"), " +
+            "(\"MAX_CLOSE_RADIUS\", \"10.0\"), " +
+            "(\"REFRESH_INTERVAL\", \"1800\"), " +
+            "(\"SHOW_EMPTY_THREATS\", \"1\");";
 
     private final String DROP_STATIONS = "DROP TABLE IF EXISTS stations;";
     private final String DROP_MEASURMENTS = "DROP TABLE IF EXISTS measurements;";
