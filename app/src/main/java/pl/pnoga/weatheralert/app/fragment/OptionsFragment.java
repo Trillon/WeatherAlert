@@ -1,19 +1,16 @@
 package pl.pnoga.weatheralert.app.fragment;
 
-import android.app.Activity;
-import android.app.Fragment;
-import android.net.Uri;
+import android.app.AlertDialog;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.preference.Preference;
+import android.preference.PreferenceFragment;
+import android.util.Log;
 import pl.pnoga.weatheralert.app.R;
+import pl.pnoga.weatheralert.app.dao.OptionsDAO;
 
-public class OptionsFragment extends Fragment {
-
-
-    private OnFragmentInteractionListener mListener;
-
+public class OptionsFragment extends PreferenceFragment {
+    private final String TAG = "OptionsFragment";
+    private OptionsDAO optionsDAO;
     public OptionsFragment() {
     }
 
@@ -25,40 +22,145 @@ public class OptionsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        addPreferencesFromResource(R.xml.options);
+        openDatabaseConnection();
+        setDefaultOptions();
+        setChangeListenersForPreferences();
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_options, container, false);
+    private void openDatabaseConnection() {
+        optionsDAO = new OptionsDAO(getActivity());
+        optionsDAO.open();
     }
 
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
+    private void setDefaultOptions() {
+        Log.d(TAG, String.valueOf(getPreferenceScreen().findPreference("pref_wind_speed")));
+        getPreferenceScreen().findPreference("pref_max_temp").setDefaultValue(optionsDAO.getMaxCritTemperature());
+        getPreferenceScreen().findPreference("pref_min_temp").setDefaultValue(optionsDAO.getMinCritTemperature());
+        getPreferenceScreen().findPreference("pref_wind_speed").setDefaultValue(optionsDAO.getCritWindSpeed());
+        getPreferenceScreen().findPreference("pref_shower").setDefaultValue(optionsDAO.getCritShower());
+        getPreferenceScreen().findPreference("pref_max_radius").setDefaultValue(optionsDAO.getMaxRadius());
+        getPreferenceScreen().findPreference("pref_close_radius").setDefaultValue(optionsDAO.getCloseRadius());
+        getPreferenceScreen().findPreference("pref_interval").setDefaultValue(30 * 60);
     }
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
+    private void setChangeListenersForPreferences() {
+        getPreferenceScreen().findPreference("pref_max_temp").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                boolean returnValue = true;
+                if (Double.valueOf((String) newValue) < optionsDAO.getMinCritTemperature()) {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setTitle("Niewłaściwe dane");
+                    builder.setMessage("Maksymalna temperatura nie może być mniejsza od minimalnej!");
+                    builder.setPositiveButton(android.R.string.ok, null);
+                    builder.show();
+                    returnValue = false;
+                } else {
+                    optionsDAO.saveMaxCritTemperature(Double.valueOf((String) newValue));
+                }
+                return returnValue;
+            }
+        });
+        getPreferenceScreen().findPreference("pref_min_temp").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                boolean returnValue = true;
+                if (Double.valueOf((String) newValue) > optionsDAO.getMaxCritTemperature()) {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setTitle("Niewłaściwe dane");
+                    builder.setMessage("Maksymalna temperatura nie może być mniejsza od minimalnej!");
+                    builder.setPositiveButton(android.R.string.ok, null);
+                    builder.show();
+                    returnValue = false;
+                } else {
+                    optionsDAO.saveMinCritTemperature(Double.valueOf((String) newValue));
+                }
+                return returnValue;
+            }
+        });
+        getPreferenceScreen().findPreference("pref_wind_speed").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                boolean returnValue = true;
+                if (Double.valueOf((String) newValue) <= 0) {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setTitle("Niewłaściwe dane");
+                    builder.setMessage("Prędkość wiatru musi być wieksza od 0!");
+                    builder.setPositiveButton(android.R.string.ok, null);
+                    builder.show();
+                    returnValue = false;
+                } else {
+                    optionsDAO.saveCritWindSpeed(Double.valueOf((String) newValue));
+                }
+                return returnValue;
+            }
+        });
+        getPreferenceScreen().findPreference("pref_shower").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                boolean returnValue = true;
+                if (Double.valueOf((String) newValue) <= 0) {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setTitle("Niewłaściwe dane");
+                    builder.setMessage("Opad musi być wiekszy od 0!");
+                    builder.setPositiveButton(android.R.string.ok, null);
+                    builder.show();
+                    returnValue = false;
+                } else {
+                    optionsDAO.saveCritShower(Double.valueOf((String) newValue));
+                }
+                return returnValue;
+            }
+        });
+        getPreferenceScreen().findPreference("pref_max_radius").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                boolean returnValue = true;
+                if (Double.valueOf((String) newValue) < optionsDAO.getCloseRadius()) {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setTitle("Niewłaściwe dane");
+                    builder.setMessage("Maksymalny zasięg nie może być mniejszy od bliskiego zasiegu!");
+                    builder.setPositiveButton(android.R.string.ok, null);
+                    builder.show();
+                    returnValue = false;
+                } else {
+                    optionsDAO.saveMaxRadius(Double.valueOf((String) newValue));
+                }
+                return returnValue;
+            }
+        });
+        getPreferenceScreen().findPreference("pref_close_radius").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                boolean returnValue = true;
+                if (Double.valueOf((String) newValue) > optionsDAO.getMaxRadius()) {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setTitle("Niewłaściwe dane");
+                    builder.setMessage("Maksymalny zasięg nie może być mniejszy od bliskiego zasiegu!");
+                    builder.setPositiveButton(android.R.string.ok, null);
+                    builder.show();
+                    returnValue = false;
+                } else {
+                    optionsDAO.saveCloseRadius(Double.valueOf((String) newValue));
+                }
+                return returnValue;
+            }
+        });
+        getPreferenceScreen().findPreference("pref_interval").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                boolean returnValue = true;
+                if (Double.valueOf((String) newValue) <= 0) {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setTitle("Niewłaściwe dane");
+                    builder.setMessage("Interwał odświezania musi być wiekszy od 0!");
+                    builder.setPositiveButton(android.R.string.ok, null);
+                    builder.show();
+                    returnValue = false;
+                }
+                return returnValue;
+            }
+        });
     }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    public interface OnFragmentInteractionListener {
-        public void onFragmentInteraction(Uri uri);
-    }
-
 }

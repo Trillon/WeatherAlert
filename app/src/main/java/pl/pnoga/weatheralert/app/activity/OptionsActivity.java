@@ -1,19 +1,22 @@
 package pl.pnoga.weatheralert.app.activity;
 
+import android.app.Activity;
+import android.app.Dialog;
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import pl.pnoga.weatheralert.app.R;
 import pl.pnoga.weatheralert.app.fragment.OptionsFragment;
 
-public class OptionsActivity extends PreferenceActivity {
+public class OptionsActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_options);
-        getFragmentManager().beginTransaction().replace(R.layout.activity_options, new OptionsFragment()).commit();
+        getFragmentManager().beginTransaction().replace(R.id.options_layout, new OptionsFragment()).commit();
+
     }
 
     @Override
@@ -26,7 +29,13 @@ public class OptionsActivity extends PreferenceActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_settings) {
+        if (id == R.id.info_settings) {
+            final Dialog dialog = new Dialog(OptionsActivity.this);
+            dialog.setContentView(R.layout.about_dialog);
+            dialog.setTitle("O aplikacji");
+            TextView about = (TextView) dialog.findViewById(R.id.txt_about);
+            about.setText(R.string.about);
+            dialog.show();
             return true;
         }
 
