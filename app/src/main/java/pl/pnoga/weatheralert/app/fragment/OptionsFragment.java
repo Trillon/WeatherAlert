@@ -44,7 +44,7 @@ public class OptionsFragment extends PreferenceFragment {
         getPreferenceScreen().findPreference("pref_max_radius").setDefaultValue(optionsDAO.getMaxRadius());
         getPreferenceScreen().findPreference("pref_close_radius").setDefaultValue(optionsDAO.getCloseRadius());
         getPreferenceScreen().findPreference("pref_interval").setDefaultValue(optionsDAO.getRefreshInterval());
-        getPreferenceScreen().findPreference("pref_show_empty").setDefaultValue(true);
+        getPreferenceScreen().findPreference("pref_show_empty").setDefaultValue(optionsDAO.getShowEmptyThreats() != 0);
     }
 
     private void setChangeListenersForPreferences() {
