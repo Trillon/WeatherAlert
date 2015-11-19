@@ -11,4 +11,7 @@
         \n\nDane pogodowe pochodzą z serwisu realizowanego w ramach programu \"Małopolska Chmura Edukacyjna\""</string>
     <string name="title_activity_options">Opcje</string>
     <string name="action_settings">Settings</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

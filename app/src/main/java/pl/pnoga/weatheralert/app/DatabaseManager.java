@@ -38,12 +38,12 @@ public class DatabaseManager extends SQLiteOpenHelper {
             "name text," +
             "value double," +
             "UNIQUE (name) ON CONFLICT IGNORE)";
-    private final String INSERT_DEFAULT_OPTIONS ="INSERT INTO options VALUES (\"CRIT_MAX_TEMPERATURE\", \"30.0\");" +
-            "INSERT INTO options VALUES (\"CRIT_MIN_TEMPERATURE\", \"-15.0\");" +
-            "INSERT INTO options VALUES (\"CRIT_WIND_SPEED\", \"20.0\");" +
-            "INSERT INTO options VALUES (\"CRIT_SHOWER\", \"30.0\");" +
-            "INSERT INTO options VALUES (\"MAX_RADIUS\", \"20.0\");" +
-            "INSERT INTO options VALUES (\"MAX_CLOSE_RADIUS\", \"10.0\");";
+    private final String INSERT_DEFAULT_OPTIONS ="INSERT INTO options(name, value) VALUES (\"CRIT_MAX_TEMPERATURE\", \"30.0\");" +
+            "INSERT INTO options(name, value) VALUES (\"CRIT_MIN_TEMPERATURE\", \"-15.0\");" +
+            "INSERT INTO options(name, value) VALUES (\"CRIT_WIND_SPEED\", \"20.0\");" +
+            "INSERT INTO options(name, value) VALUES (\"CRIT_SHOWER\", \"30.0\");" +
+            "INSERT INTO options(name, value) VALUES (\"MAX_RADIUS\", \"20.0\");" +
+            "INSERT INTO options(name, value) VALUES (\"MAX_CLOSE_RADIUS\", \"10.0\");";
 
     private final String DROP_STATIONS = "DROP TABLE IF EXISTS stations;";
     private final String DROP_MEASURMENTS = "DROP TABLE IF EXISTS measurements;";

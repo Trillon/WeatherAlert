@@ -1,17 +1,19 @@
 package pl.pnoga.weatheralert.app.activity;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.preference.PreferenceActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import pl.pnoga.weatheralert.app.R;
+import pl.pnoga.weatheralert.app.fragment.OptionsFragment;
 
-public class OptionsActivity extends Activity {
+public class OptionsActivity extends PreferenceActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_options);
+        getFragmentManager().beginTransaction().replace(R.layout.activity_options, new OptionsFragment()).commit();
     }
 
     @Override
