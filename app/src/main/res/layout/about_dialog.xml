@@ -9,5 +9,6 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="Medium Text"
+            android:padding="@dimen/activity_horizontal_margin"
             android:id="@+id/txt_about"/>
 </LinearLayout>
