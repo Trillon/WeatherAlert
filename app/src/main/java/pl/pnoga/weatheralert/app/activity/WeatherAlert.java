@@ -132,7 +132,6 @@ public class WeatherAlert extends Activity {
             final Dialog dialog = new Dialog(WeatherAlert.this);
             dialog.setContentView(R.layout.about_dialog);
             dialog.setTitle("O aplikacji");
-            TextView about = (TextView) dialog.findViewById(R.id.txt_about);
             dialog.show();
             return true;
         }

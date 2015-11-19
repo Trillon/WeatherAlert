@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 import pl.pnoga.weatheralert.app.R;
 import pl.pnoga.weatheralert.app.fragment.OptionsFragment;
 
@@ -33,7 +32,6 @@ public class OptionsActivity extends Activity {
             final Dialog dialog = new Dialog(OptionsActivity.this);
             dialog.setContentView(R.layout.about_dialog);
             dialog.setTitle("O aplikacji");
-            TextView about = (TextView) dialog.findViewById(R.id.txt_about);
             dialog.show();
             return true;
         }
