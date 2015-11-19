@@ -133,7 +133,6 @@ public class WeatherAlert extends Activity {
             dialog.setContentView(R.layout.about_dialog);
             dialog.setTitle("O aplikacji");
             TextView about = (TextView) dialog.findViewById(R.id.txt_about);
-            about.setText(R.string.about);
             dialog.show();
             return true;
         }
