@@ -20,6 +20,7 @@ import android.widget.TextView;
 import pl.pnoga.weatheralert.app.R;
 import pl.pnoga.weatheralert.app.adapter.ThreatsAdapter;
 import pl.pnoga.weatheralert.app.dao.MeasurementDAO;
+import pl.pnoga.weatheralert.app.dao.OptionsDAO;
 import pl.pnoga.weatheralert.app.dao.StationDAO;
 import pl.pnoga.weatheralert.app.dao.ThreatDAO;
 import pl.pnoga.weatheralert.app.model.WeatherMeasurement;
@@ -28,15 +29,11 @@ import pl.pnoga.weatheralert.app.utils.ThreatComparator;
 import pl.pnoga.weatheralert.app.utils.ThreatFinder;
 
 import static android.content.ContentResolver.setIsSyncable;
+import static pl.pnoga.weatheralert.app.utils.Constants.*;
 
 
 public class WeatherAlert extends Activity {
-    public static final String AUTHORITY = "pl.pnoga.weatheralert.provider";
-    public static final String ACCOUNT_TYPE = "pnoga.pl";
-    public static final String ACCOUNT = "WeatherAlert";
-    public static final String ACTION_FINISHED_SYNC = "pl.pnoga.weatheralert.app.activity.ACTION_FINISHED_SYNC";
     private static IntentFilter syncIntentFilter = new IntentFilter(ACTION_FINISHED_SYNC);
-    private final int SYNC_INTERVAL = 30 * 60;
     private final String TAG = "WeatherAlert";
     Account mAccount;
     TextView userCoordinates, stationCount;
@@ -44,6 +41,7 @@ public class WeatherAlert extends Activity {
     private StationDAO stationDAO;
     private MeasurementDAO measurementDAO;
     private ThreatDAO threatDAO;
+    private OptionsDAO optionsDAO;
     private ProgressDialog progressDialog;
     private LocationService locationService;
     private BroadcastReceiver syncBroadcastReceiver = new BroadcastReceiver() {
@@ -54,7 +52,7 @@ public class WeatherAlert extends Activity {
         }
     };
 
-    private static Account CreateSyncAccount(Context context) {
+    public static Account CreateSyncAccount(Context context) {
         Account newAccount = new Account(
                 ACCOUNT, ACCOUNT_TYPE);
         AccountManager accountManager =
@@ -75,8 +73,8 @@ public class WeatherAlert extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather_alert);
-        createUserAndStartUpdates();
         openDatabaseConnections();
+        createUserAndStartUpdates();
         getLocationAndUpdateView();
     }
 
@@ -153,22 +151,25 @@ public class WeatherAlert extends Activity {
         stationDAO = new StationDAO(this);
         measurementDAO = new MeasurementDAO(this);
         threatDAO = new ThreatDAO(this);
+        optionsDAO = new OptionsDAO(this);
         stationDAO.open();
         measurementDAO.open();
         threatDAO.open();
+        optionsDAO.open();
     }
 
     private void closeDatabaseConnections() {
         stationDAO.close();
         measurementDAO.close();
         threatDAO.close();
+        optionsDAO.close();
     }
 
     private void createUserAndStartUpdates() {
         mAccount = CreateSyncAccount(this);
         ContentResolver.setSyncAutomatically(mAccount, AUTHORITY, true);
         ContentResolver.setIsSyncable(mAccount, AUTHORITY, 1);
-        ContentResolver.addPeriodicSync(mAccount, AUTHORITY, Bundle.EMPTY, SYNC_INTERVAL);
+        ContentResolver.addPeriodicSync(mAccount, AUTHORITY, Bundle.EMPTY, (long) optionsDAO.getRefreshInterval());
     }
 
     private void getLocationAndUpdateView() {

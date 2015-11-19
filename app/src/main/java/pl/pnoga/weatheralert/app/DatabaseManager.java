@@ -43,7 +43,8 @@ public class DatabaseManager extends SQLiteOpenHelper {
             "INSERT INTO options(name, value) VALUES (\"CRIT_WIND_SPEED\", \"20.0\");" +
             "INSERT INTO options(name, value) VALUES (\"CRIT_SHOWER\", \"30.0\");" +
             "INSERT INTO options(name, value) VALUES (\"MAX_RADIUS\", \"20.0\");" +
-            "INSERT INTO options(name, value) VALUES (\"MAX_CLOSE_RADIUS\", \"10.0\");";
+            "INSERT INTO options(name, value) VALUES (\"MAX_CLOSE_RADIUS\", \"10.0\");" +
+            "INSERT INTO options(name, value) VALUES (\"REFRESH_INTERVAL\", \"1800\");";
 
     private final String DROP_STATIONS = "DROP TABLE IF EXISTS stations;";
     private final String DROP_MEASURMENTS = "DROP TABLE IF EXISTS measurements;";

@@ -66,9 +66,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             measurementDAO.close();
         } catch (Exception e) {
             Log.e(TAG, e.getLocalizedMessage());
-            getContext().sendBroadcast(new Intent(WeatherAlert.ACTION_FINISHED_SYNC));
+            getContext().sendBroadcast(new Intent(Constants.ACTION_FINISHED_SYNC));
         }
-        getContext().sendBroadcast(new Intent(WeatherAlert.ACTION_FINISHED_SYNC));
+        getContext().sendBroadcast(new Intent(Constants.ACTION_FINISHED_SYNC));
     }
 
 

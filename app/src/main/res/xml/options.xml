@@ -4,34 +4,34 @@
             android:title="Wartości krytyczne">
         <EditTextPreference
                 android:key="pref_max_temp"
-                android:title="Maksymalna temperatura"
+                android:title="Maksymalna temperatura(°C)"
                 android:inputType="numberDecimal"/>
         <EditTextPreference
                 android:key="pref_min_temp"
-                android:title="Minimalna temperatura"
+                android:title="Minimalna temperatura(°C)"
                 android:inputType="numberSigned"/>
         <EditTextPreference
                 android:key="pref_wind_speed"
-                android:title="Predkośc wiatru"
+                android:title="Predkość wiatru(m/s)"
                 android:inputType="numberDecimal"/>
         <EditTextPreference
                 android:key="pref_shower"
-                android:title="Ilość opadów"
+                android:title="Ilość opadów(mm)"
                 android:inputType="numberDecimal"/>
         <EditTextPreference
                 android:key="pref_max_radius"
-                android:title="Maksymalny zasieg"
+                android:title="Maksymalny zasięg(km)"
                 android:inputType="numberDecimal"/>
         <EditTextPreference
                 android:key="pref_close_radius"
-                android:title="Bliski zasięg"
+                android:title="Bliski zasięg(km)"
                 android:inputType="numberDecimal"/>
     </PreferenceCategory>
     <PreferenceCategory
             android:title="Odświeżanie">
         <EditTextPreference
                 android:key="pref_interval"
-                android:title="częstotliwość"
+                android:title="Częstość(min)"
                 android:inputType="numberDecimal"/>
     </PreferenceCategory>
 </PreferenceScreen>

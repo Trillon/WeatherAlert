@@ -1,12 +1,15 @@
 package pl.pnoga.weatheralert.app.fragment;
 
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.util.Log;
 import pl.pnoga.weatheralert.app.R;
+import pl.pnoga.weatheralert.app.activity.WeatherAlert;
 import pl.pnoga.weatheralert.app.dao.OptionsDAO;
+
+import static pl.pnoga.weatheralert.app.utils.Constants.AUTHORITY;
 
 public class OptionsFragment extends PreferenceFragment {
     private final String TAG = "OptionsFragment";
@@ -34,14 +37,13 @@ public class OptionsFragment extends PreferenceFragment {
     }
 
     private void setDefaultOptions() {
-        Log.d(TAG, String.valueOf(getPreferenceScreen().findPreference("pref_wind_speed")));
         getPreferenceScreen().findPreference("pref_max_temp").setDefaultValue(optionsDAO.getMaxCritTemperature());
         getPreferenceScreen().findPreference("pref_min_temp").setDefaultValue(optionsDAO.getMinCritTemperature());
         getPreferenceScreen().findPreference("pref_wind_speed").setDefaultValue(optionsDAO.getCritWindSpeed());
         getPreferenceScreen().findPreference("pref_shower").setDefaultValue(optionsDAO.getCritShower());
         getPreferenceScreen().findPreference("pref_max_radius").setDefaultValue(optionsDAO.getMaxRadius());
         getPreferenceScreen().findPreference("pref_close_radius").setDefaultValue(optionsDAO.getCloseRadius());
-        getPreferenceScreen().findPreference("pref_interval").setDefaultValue(30 * 60);
+        getPreferenceScreen().findPreference("pref_interval").setDefaultValue(optionsDAO.getRefreshInterval());
     }
 
     private void setChangeListenersForPreferences() {
@@ -158,6 +160,9 @@ public class OptionsFragment extends PreferenceFragment {
                     builder.setPositiveButton(android.R.string.ok, null);
                     builder.show();
                     returnValue = false;
+                } else {
+                    optionsDAO.saveRefreshInterval(Double.valueOf((String) newValue) * 60);
+                    ContentResolver.addPeriodicSync(WeatherAlert.CreateSyncAccount(getActivity()), AUTHORITY, Bundle.EMPTY, Long.valueOf((String) newValue) * 60);
                 }
                 return returnValue;
             }

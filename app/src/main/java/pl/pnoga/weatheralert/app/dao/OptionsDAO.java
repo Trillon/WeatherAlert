@@ -15,6 +15,7 @@ public class OptionsDAO extends TableDAO {
     private final String CRIT_SHOWER = "CRIT_SHOWER";
     private final String MAX_RADIUS = "MAX_RADIUS";
     private final String MAX_CLOSE_RADIUS = "MAX_CLOSE_RADIUS";
+    private final String REFRESH_INTERVAL = "REFRESH_INTERVAL";
 
 
     public OptionsDAO(Context context) {
@@ -93,6 +94,18 @@ public class OptionsDAO extends TableDAO {
         return closeRadius;
     }
 
+    public double getRefreshInterval() {
+        double refreshInterval = Constants.REFRESH_INTERVAL;
+        Cursor cursor = database.query(TABLE_NAME,
+                new String[]{"value"}, "name = \"" + REFRESH_INTERVAL + "\"", null, null, null, null);
+        if (cursor.moveToFirst()) {
+            refreshInterval = cursor.getDouble(0);
+        }
+        cursor.close();
+        Log.d(TAG, REFRESH_INTERVAL + " " + refreshInterval);
+        return refreshInterval;
+    }
+
     public void saveMaxCritTemperature(double maxTemperatureValue) {
         ContentValues values = new ContentValues();
         values.put("value", maxTemperatureValue);
@@ -139,5 +152,13 @@ public class OptionsDAO extends TableDAO {
         if (database.update(TABLE_NAME, values, "name = \"" + MAX_CLOSE_RADIUS+"\"", null) == -1)
             Log.d(TAG, "Failed insert of value " + MAX_CLOSE_RADIUS);
         else Log.d(TAG, "Saved " + MAX_CLOSE_RADIUS);
+    }
+
+    public void saveRefreshInterval(double refreshInterval) {
+        ContentValues values = new ContentValues();
+        values.put("value", refreshInterval);
+        if (database.update(TABLE_NAME, values, "name = \"" + REFRESH_INTERVAL + "\"", null) == -1)
+            Log.d(TAG, "Failed insert of value " + REFRESH_INTERVAL);
+        else Log.d(TAG, "Saved " + REFRESH_INTERVAL);
     }
 }
