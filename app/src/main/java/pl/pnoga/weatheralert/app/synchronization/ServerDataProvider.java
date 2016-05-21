@@ -4,6 +4,7 @@ import android.util.Log;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 import pl.pnoga.weatheralert.app.model.StationList;
+import pl.pnoga.weatheralert.app.model.ThreatList;
 import pl.pnoga.weatheralert.app.model.WeatherMeasurementList;
 
 import java.text.SimpleDateFormat;
@@ -11,7 +12,6 @@ import java.util.Calendar;
 
 public class ServerDataProvider {
     private final String TAG = "ServerDataProvider";
-
 
     public StationList getStations() {
         RestTemplate restTemplate = new RestTemplate();
@@ -30,6 +30,10 @@ public class ServerDataProvider {
         WeatherMeasurementList weatherMeasurements = restTemplate.getForObject("http://mech.fis.agh.edu.pl/meteo/rest/json/all/" + stationName + "/" + new SimpleDateFormat("yyyy-MM-dd").format(c.getTime()), WeatherMeasurementList.class);
         Log.d(TAG, "Measurments downloaded: " + weatherMeasurements.size() + " for station " + stationName);
         return weatherMeasurements;
+    }
+
+    public ThreatList getThreats(String stationName) {
+        return new ThreatList();
     }
 
 }
